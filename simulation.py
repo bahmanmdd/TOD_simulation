@@ -24,7 +24,7 @@ def get_parameters(n_vh):
     runs = 1
     case = 'sample'
 
-    to2v = 0.2
+    to2v = 0.4
     su_t = 0
 
     n_to = int(round(n_vh * to2v))
