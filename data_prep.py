@@ -7,7 +7,7 @@ import numpy as np
 def simulation_input():
 
     # turn these into input parameters
-    carrier_prop = 0.25
+    carrier_prop = 0.03
     max_tour_len = math.inf
     region = [-math.inf, math.inf, -math.inf, math.inf]
 
