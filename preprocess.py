@@ -1,85 +1,55 @@
-"""
-    preprocessing MassGT data for simulation of teleoperated driving in shipping processes
-    created by: Bahman Madadi
-"""
-
+import math
 from itertools import chain
 import pandas as pd
 import numpy as np
-pd.options.mode.chained_assignment = None
 
 
-def select_tours(tour_len, tour_begin, runs, proportion):
+def simulation_input(carrier_prop, max_tour_len, region):
 
     # read data
-    data_full = pd.read_csv('Input/Tours_REF.csv')
+    data = pd.read_csv('Input/Tours_REF.csv')
 
-    # rng seed
-    np.random.seed(seed=7)
-
-    # shift all trips by a uniform random number between 0-1 hour (to avoid same start times)
-    tour_sizes = data_full.groupby('TOUR_ID', sort=False).size()
-    tour_delay = data_full.groupby('TOUR_ID', sort=False).apply(lambda x: np.random.uniform(0, 1))
-    # tour_delay = pd.Series(np.random.uniform(0, 1, len(tour_sizes)))
-    trip_delay = tour_delay.reindex(tour_delay.index.repeat(tour_sizes)).values
-    data_full['TOUR_DEPTIME'] = data_full['TOUR_DEPTIME'] + trip_delay
-    data_full['TRIP_DEPTIME'] = data_full['TRIP_DEPTIME'] + trip_delay
-    data_full['TRIP_ARRTIME'] = data_full['TRIP_ARRTIME'] + trip_delay
-
-    # filter based on tour begin and tour duration
-    data = data_full[(data_full['TOUR_DEPTIME'] >= tour_begin) & (data_full['TRIP_ARRTIME'] <= (tour_begin+tour_len))]
+    # fileter data based on maximum tour length
+    data = data[data['TRIP_ARRTIME'] < max_tour_len]
 
     # fix id issues
-    data[['CARRIER_ID', 'TOUR_ID', 'TRIP_ID']] = data[['CARRIER_ID', 'TOUR_ID', 'TRIP_ID']].astype(int)
-    data['TOUR_ID'] = data[['CARRIER_ID', 'TOUR_ID']].apply(tuple, axis=1)
+    data['CARRIER_ID'] = data['CARRIER_ID'].astype(int)
+    data['TOUR_ID'] = data['TOUR_ID'].apply(lambda x: (int(x.split('_')[-2]), int(x.split('_')[-1])))
+    data['TRIP_ID'] = data['TRIP_ID'].apply(lambda x: int(x.split('_')[-1]))
+
+    # filter based on the proportion of carriers to include in study
+    carriers = data['CARRIER_ID'].unique()
+    data = data[data['CARRIER_ID'].isin(carriers[:int(len(carriers)*carrier_prop)])]
+    # filter based on region
+    data = data[(region[0] <= data['X_ORIG']) & (data['X_ORIG'] <= region[1])]
+    data = data[(region[0] <= data['X_DEST']) & (data['X_DEST'] <= region[1])]
+    data = data[(region[2] <= data['Y_DEST']) & (data['Y_DEST'] <= region[3])]
+    data = data[(region[2] <= data['Y_ORIG']) & (data['Y_ORIG'] <= region[3])]
 
     # sort data
     data = data.sort_values(by=['TOUR_DEPTIME', 'CARRIER_ID', 'TOUR_ID', 'TRIP_ID'])
-    tours = data['TOUR_ID'].unique()
+    data_np = data.values
 
-    for r in range(runs):
+    # calculate buffer values
+    buffer = np.zeros(len(data_np))
+    for i in range(len(data_np)):
+        if data_np[i, 2] == 0:
+            buffer[i] = data_np[i, 16] - data_np[i, 15]
+        else:
+            buffer[i] = data_np[i, 16] - data_np[i-1, 17]
+    data['buffer'] = buffer
 
-        # rng seed
-        np.random.seed(seed=r)
-
-        # filter based on the proportion of carriers to include in study
-        tours_sample = sorted(np.random.choice(tours, int(len(tours) * proportion), replace=False))
-        data_sample = data[data['TOUR_ID'].isin(tours_sample)]
-
-        # new df with only values we need
-        input_data = pd.DataFrame()
-        input_data['vehicle_id'] = data_sample['TOUR_ID']
-        input_data['trip_id'] = data_sample['TRIP_ID']
-        input_data['tour_departure'] = data_sample['TOUR_DEPTIME'] * 60
-        input_data['moving_duration'] = (data_sample['TRIP_ARRTIME'] - data['TRIP_DEPTIME']) * 60
-
-        # calculate buffer values (extract MassGT generated values)
-        data_np = data_sample.values
-        buffer = np.zeros(len(data_np))
-        for i in range(len(data_np)):
-            if data_np[i, 2]/data_np[i, 1][1] == 10:
-                buffer[i] = data_np[i, 16] - data_np[i, 15]
-            else:
-                buffer[i] = data_np[i, 16] - data_np[i - 1, 17]
-        data_sample['buffer'] = buffer
-
-        # buffer from MassGT generated values
-        input_data['buffer_duration'] = data_sample['buffer'] * 60
-
-        # # save filtered tours
-        input_data.to_csv('Input/Tours_filtered_S' + str(r) + '.csv', index=False)
-
-
-def simulation_input(run_number, takeover_time):
-
-    # read data
-    input_data = pd.read_csv('Input/Tours_filtered_S' + str(run_number) + '.csv')
-
-    input_data['moving_duration'] = np.around(input_data['moving_duration'], 4)
-    input_data['buffer_duration'] = np.around(input_data['buffer_duration'], 4)
+    # new df with only values we need
+    input_data = pd.DataFrame()
+    input_data['vehicle_id'] = data['TOUR_ID']
+    input_data['trip_id'] = data['TRIP_ID']
+    input_data['tour_departure'] = data['TOUR_DEPTIME'] * 60
+    input_data['buffer_duration'] = data['buffer'] * 60
+    input_data['departure_time'] = data['TRIP_DEPTIME'] * 60
+    input_data['moving_duration'] = (data['TRIP_ARRTIME'] - data['TRIP_DEPTIME']) * 60
 
     begin_times = input_data.groupby(['vehicle_id'], sort=False).first()['tour_departure']
-    total_to_planned = np.sum(input_data['moving_duration'])
+    begin_times_np = begin_times.values
 
     vid = input_data['vehicle_id'].unique()
     n_vh = len(vid)
@@ -90,15 +60,23 @@ def simulation_input(run_number, takeover_time):
     temp['vid'] = input_data[['vehicle_id']]
     temp['tid'] = input_data[['trip_id']]
     # only buffer and moving
-    temp['dists'] = input_data[input_data.columns[-2:]].apply(lambda x: [x[1], 0, takeover_time, x[0]], axis=1)
+    temp['dists'] = input_data[input_data.columns[-3:]].apply(lambda x: [x[0], 0, x[2]], axis=1)
     temp2 = temp.groupby(['vid'], sort=False)['dists'].apply(lambda x: list(x[:]))
     act_dist = [list(chain(*x)) for x in temp2.values]
 
     for v in range(len(vid)):
-        act_seq[v] = ['Buffer', 'TO Queue', 'Takeover', 'Teleoperated'] * tour_len[v]
+        act_seq[v] = ['buffer', 'TO Queue', 'Moving'] * tour_len[v]
+        act_seq[v].insert(0, 'Signed in')
         act_seq[v].append('Signed off')
-        act_dist[v].append(0)
+        act_dist[v].insert(0, begin_times_np[v])
+        act_dist[v].append(math.inf)
 
-    return n_vh, act_seq, act_dist, np.around(begin_times.values, 3), total_to_planned
+    return n_vh, act_seq, act_dist
 
-
+    # for testing and validation
+    # np.array_equal(temp2.index.values, input_data['vehicle_id'].unique())
+    # np.array_equal(begin_times.index.values, input_data['vehicle_id'].unique())
+    # len_dist = np.array([len(x) for x in act_dist])
+    # len_seq = np.array([len(x) for x in act_seq])
+    # np.array_equal(len_seq, len_dist)
+    # np.min(input_data['buffer_duration'])

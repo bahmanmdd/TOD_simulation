@@ -8,9 +8,9 @@ import pandas as pd
 import numpy as np
 import os
 from datetime import datetime
-import data_prep
+import preprocess
 import visualize
-import stats
+import report
 
 
 class Vehicle(object):
@@ -378,57 +378,75 @@ if __name__ == "__main__":
     ## simulation scenario parameters
     runs = 1
     case = 'full'
-    to2v = 0.1
-    setup_to = 0
-    carrier_prop = 0.01
+    to2v_ratio = 0.1
+    takeover_time = 0
+    carrier_proportion = 0.01
     max_tour_len = math.inf
     region = [-math.inf, math.inf, -math.inf, math.inf]
+
+    # lists of parameter options for batch runs
+    to2v_ratio_list = np.array(list(range(5, 105, 5))) / 100
+    to2v_ratio_list = [0.1]
+    takeover_time_list = [0, 1, 2, 5]
+    takeover_time_list = [0]
+    carrier_proportion_list = [0.01, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]
+    carrier_proportion_list = [0.05]
 
     Begin_dp = datetime.now()
 
     # run data preprocessing and return simulation input
-    n_vh, act_seq, act_dist = data_prep.simulation_input(carrier_prop, max_tour_len, region)
+    n_vh, act_seq, act_dist = preprocess.simulation_input(carrier_proportion, max_tour_len, region)
 
     # report data processing run time
     print('Dara preprocessing run time: ')
     print(datetime.now() - Begin_dp)
 
-    n_to = int(round(n_vh * to2v))
+    for carrier_proportion in carrier_proportion_list:
+        for to2v_ratio in to2v_ratio_list:
+            for takeover_time in takeover_time_list:
 
-    # create output directory (if it does not exist already)
-    output_dir = 'Output/' + case + '_v-{}'.format(n_vh) + '_to2v-{:.2f}'.format(to2v) + '_su-{}'.format(setup_to) + '_R-{}'.format(runs)
-    if not os.path.exists(output_dir):
-        os.makedirs(output_dir)
+                n_to = int(round(n_vh * to2v_ratio))
 
-    # record simulation run time
-    Begin = datetime.now()
+                # create output directory (if it does not exist already)
+                output_dir = 'Output/' + case + '_v-{}'.format(n_vh) + '_to2v-{:.2f}'.format(to2v_ratio) + '_su-{}'.format(takeover_time) + '_R-{}'.format(runs)
+                if not os.path.exists(output_dir):
+                    os.makedirs(output_dir)
 
-    # replications
-    print('Simulation in progress...')
-    for r in range(runs):
-        # run simulation
-        print('Running replication {0}'.format(r + 1))
-        utl, sts, cnt, qus, srt = run_simulation(r + 1, output_dir, runs, case, n_vh, n_to, setup_to, act_seq, act_dist)
+                # record simulation run time
+                Begin = datetime.now()
 
-        # record stats
-        if r == 0:
-            utilizations = utl
-            statuses = sts.transpose().reset_index()
-            counts = pd.DataFrame(cnt).transpose().reset_index()
-            queues = pd.DataFrame(qus).transpose().reset_index()
-            times = [srt]
-        else:
-            utilizations = utilizations.append(utl, ignore_index=True)
-            statuses = statuses.append(sts.transpose().reset_index(), ignore_index=True)
-            counts = counts.append(pd.DataFrame(cnt).transpose().reset_index(), ignore_index=True)
-            queues = queues.append(pd.DataFrame(qus).transpose().reset_index(), ignore_index=True)
-            times.append(srt)
+                # replications
+                print('********************')
+                print('Scenario parameters:')
+                print('--------------------')
+                print('Proportion of carriers included: {}'.format(carrier_proportion))
+                print('Teleoperator to vehicle ratio: {}'.format(to2v_ratio))
+                print('Teleoperator takeover time: {}'.format(takeover_time))
+                print('Simulation in progress...')
+                for r in range(runs):
+                    # run simulation
+                    print('Running replication {0}'.format(r + 1))
+                    utl, sts, cnt, qus, srt = run_simulation(r + 1, output_dir, runs, case, n_vh, n_to, takeover_time, act_seq, act_dist)
 
-    # report simulation run time
-    print('\nSimulation run time for {0} run(s): '.format(runs))
-    print(datetime.now() - Begin)
-    print('\nReplication run time: ')
-    print((datetime.now() - Begin) / runs)
+                    # record stats
+                    if r == 0:
+                        utilizations = utl
+                        statuses = sts.transpose().reset_index()
+                        counts = pd.DataFrame(cnt).transpose().reset_index()
+                        queues = pd.DataFrame(qus).transpose().reset_index()
+                        times = [srt]
+                    else:
+                        utilizations = utilizations.append(utl, ignore_index=True)
+                        statuses = statuses.append(sts.transpose().reset_index(), ignore_index=True)
+                        counts = counts.append(pd.DataFrame(cnt).transpose().reset_index(), ignore_index=True)
+                        queues = queues.append(pd.DataFrame(qus).transpose().reset_index(), ignore_index=True)
+                        times.append(srt)
 
-    # save summary stats
-    stats.save_summary(utilizations, statuses, counts, queues, times, output_dir)
+                # report simulation run time
+                print('\nSimulation run time for {0} run(s): '.format(runs))
+                print(datetime.now() - Begin)
+                print('\nReplication run time: ')
+                print((datetime.now() - Begin) / runs)
+
+                # save summary stats
+                report.stats_summary(utilizations, statuses, counts, queues, times, output_dir)
