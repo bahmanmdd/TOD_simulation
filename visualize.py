@@ -75,15 +75,15 @@ def plot_results(states_vh_df, states_to_df, queues_df, output_dir, replication_
     fig3.set_size_inches(12, 6)
     fig4.set_size_inches(12, 6)
 
-    fig1.savefig(output_dir + '/R_{0}'.format(replication_no) + '_states_vh_m.jpeg', dpi=600)
-    fig2.savefig(output_dir + '/R_{0}'.format(replication_no) + '_queues.jpeg', dpi=600)
-    fig3.savefig(output_dir + '/R_{0}'.format(replication_no) + '_states_vh.jpeg', dpi=600)
-    fig4.savefig(output_dir + '/R_{0}'.format(replication_no) + '_states_to.jpeg', dpi=600)
+    fig1.savefig(output_dir + '/R_{0}'.format(replication_no) + '_states_vh_m.jpeg', dpi=800)
+    fig2.savefig(output_dir + '/R_{0}'.format(replication_no) + '_queues.jpeg', dpi=800)
+    fig3.savefig(output_dir + '/R_{0}'.format(replication_no) + '_states_vh.jpeg', dpi=800)
+    fig4.savefig(output_dir + '/R_{0}'.format(replication_no) + '_states_to.jpeg', dpi=800)
 
     plt.close("all")
 
 
-def plot_summary(states_vh_df, states_to_df, queues_df, output_dir, replication_no, runs, case, n_vh, n_to, setup_to):
+def plot_summary(states_vh_df, states_to_df, queues_df, output_dir, replication_no, runs, n_vh, n_to, setup_to):
 
     duration = states_vh_df.index[-1]
 

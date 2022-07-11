@@ -1,7 +1,9 @@
+import os
+
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-# plt.style.use("ggplot")
+plt.style.use("ggplot")
 
 
 def stats_summary(utilizations, statuses, counts, queues, times, output_dir):
@@ -39,7 +41,7 @@ def tradeoff_plots(to2v_ratio_list, carrier_proportion_list, takeover_time_list)
         for tov in to2v_ratio_list:
             for tot in takeover_time_list:
 
-                name = 'Output/' + '_cp-{:.3f}'.format(cp) + '_to2v-{:.2f}'.format(tov) + '_su-{}'.format(tot)\
+                name = 'Output/' + 'cp-{:.3f}'.format(cp) + '_to2v-{:.2f}'.format(tov) + '_su-{}'.format(tot)\
                        + '_R-1/R_0_summary_utilization.xlsx'
 
                 df_temp = pd.read_excel(name)
@@ -58,13 +60,17 @@ def tradeoff_plots(to2v_ratio_list, carrier_proportion_list, takeover_time_list)
              'AVG_queue_time',
              'Max_queue_time',
              'AVG_queue_per_vehicle']]
-    df.to_excel('Output/0 Ratios/Full_ratios.xlsx', index=False)
+
+    output_dir = 'Output/0 Ratios'
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+    df.to_excel(output_dir + '/Full_ratios.xlsx', index=False)
 
     # separate series with queries
     df_carrier_proportions = {}
     for cp in carrier_proportion_list:
         df_carrier_proportions[cp] = df.query('carrier_proportion == @cp')
-        df_carrier_proportions[cp].to_excel('Output/0 Ratios/cp_' + cp + '_ratios.xlsx', index=False)
+        df_carrier_proportions[cp].to_excel(output_dir + '/cp_' + str(cp) + '_ratios.xlsx', index=False)
         df_avg = df_carrier_proportions[cp].pivot(index='TO2vehicle_ratio', columns='TO_takeover_time', values='AVG_queue_time')
         df_max = df_carrier_proportions[cp].pivot(index='TO2vehicle_ratio', columns='TO_takeover_time', values='Max_queue_time')
         df_vav = df_carrier_proportions[cp].pivot(index='TO2vehicle_ratio', columns='TO_takeover_time', values='AVG_queue_per_vehicle')
@@ -72,19 +78,19 @@ def tradeoff_plots(to2v_ratio_list, carrier_proportion_list, takeover_time_list)
         df_avg.plot()
         plt.xlabel('Teleoperator-to-vehicle ratio')
         plt.ylabel('Average queue duration (minutes)')
-        plt.savefig('Output/0 Ratios/cp_' + cp + '_avg_q_times.jpeg', dpi=800)
+        plt.savefig(output_dir + '/cp_' + str(cp) + '_avg_q_times.jpeg', dpi=800)
         plt.close()
 
         df_max.plot()
         plt.xlabel('Teleoperator-to-vehicle ratio')
         plt.ylabel('Max queue duration (minutes)')
-        plt.savefig('Output/0 Ratios/cp_' + cp + '_max_q_times.jpeg', dpi=800)
+        plt.savefig(output_dir + '/cp_' + str(cp) + '_max_q_times.jpeg', dpi=800)
         plt.close()
 
         df_vav.plot()
         plt.xlabel('Teleoperator-to-vehicle ratio')
         plt.ylabel('Average wait time per vehicle (minutes)')
-        plt.savefig('Output/0 Ratios/cp_' + cp + '_avg_vq_times.jpeg', dpi=800)
+        plt.savefig(output_dir + '/cp_' + str(cp) + '_avg_vq_times.jpeg', dpi=800)
         plt.close()
 
 

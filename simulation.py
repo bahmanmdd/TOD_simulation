@@ -48,7 +48,7 @@ class Teleoperator(object):
         self.status = status
 
 
-def run_simulation(replication_no, output_dir, runs, case, n_vh, n_to, setup_to, act_seq, act_dist):
+def run_simulation(replication_no, output_dir, runs, n_vh, n_to, setup_to, act_seq, act_dist):
 
     ##################
     # initialization #
@@ -305,7 +305,7 @@ def run_simulation(replication_no, output_dir, runs, case, n_vh, n_to, setup_to,
 
     # save summary plot
     if replication_no == 1:
-        visualize.plot_summary(states_vh_df, states_to_df, queues_df, output_dir, replication_no, runs, case, n_vh, n_to, setup_to)
+        visualize.plot_summary(states_vh_df, states_to_df, queues_df, output_dir, replication_no, runs, n_vh, n_to, setup_to)
 
     # event log to dataframe
     event_log = pd.DataFrame(event_log.astype(str), columns=names.keys())
@@ -385,11 +385,11 @@ if __name__ == "__main__":
 
     # lists of parameter options for batch runs
     to2v_ratio_list = np.array(list(range(5, 105, 5))) / 100
-    to2v_ratio_list = [0.2, 0.4]
+    to2v_ratio_list = [0.1, 0.2, 0.3, 0.4, 0.5]
     takeover_time_list = [0, 1, 2, 5]
     takeover_time_list = [0, 1]
     carrier_proportion_list = [0.01, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]
-    carrier_proportion_list = [0.002, 0.005]
+    carrier_proportion_list = [0.01, 0.05]
 
     # batch scenario runs
     for carrier_proportion in carrier_proportion_list:
@@ -407,7 +407,7 @@ if __name__ == "__main__":
                 n_to = int(round(n_vh * to2v_ratio))
 
                 # create output directory (if it does not exist already)
-                output_dir = 'Output/' + '_cp-{:.3f}'.format(carrier_proportion) + '_to2v-{:.2f}'.format(to2v_ratio) + '_su-{}'.format(takeover_time) + '_R-{}'.format(runs)
+                output_dir = 'Output/' + 'cp-{:.3f}'.format(carrier_proportion) + '_to2v-{:.2f}'.format(to2v_ratio) + '_su-{}'.format(takeover_time) + '_R-{}'.format(runs)
                 if not os.path.exists(output_dir):
                     os.makedirs(output_dir)
 
@@ -425,7 +425,7 @@ if __name__ == "__main__":
                 for r in range(runs):
                     # run simulation
                     print('Running replication {0}'.format(r + 1))
-                    utl, sts, cnt, qus, srt = run_simulation(r + 1, output_dir, runs, case, n_vh, n_to, takeover_time, act_seq, act_dist)
+                    utl, sts, cnt, qus, srt = run_simulation(r + 1, output_dir, runs, n_vh, n_to, takeover_time, act_seq, act_dist)
 
                     # record stats
                     if r == 0:
