@@ -22,9 +22,9 @@ def get_parameters(n_vh):
     """ simulation parameters """
 
     runs = 1
-    case = 'sample'
+    case = 'full'
 
-    to2v = 0.4
+    to2v = 0.5
     su_t = 0
 
     n_to = int(round(n_vh * to2v))
@@ -67,7 +67,7 @@ class Teleoperator(object):
         self.status = status
 
 
-def run_simulation_pd(replication_no, output_dir, runs, case, n_vh, n_to, setup_to, act_seq, act_dist, begin_times):
+def run_simulation(replication_no, output_dir, runs, case, n_vh, n_to, setup_to, act_seq, act_dist, begin_times):
 
     # todo:
     ## event list to numpy array for efficiency (list of column names in dic and array instead of df)
@@ -380,7 +380,7 @@ def run_simulation_pd(replication_no, output_dir, runs, case, n_vh, n_to, setup_
     return summary_utl, summary_sts, summary_cnt, summary_qus, states_vh_df.index[-1]
 
 
-def run_simulation(replication_no, output_dir, runs, case, n_vh, n_to, setup_to, act_seq, act_dist, begin_times):
+def run_simulation_np(replication_no, output_dir, runs, case, n_vh, n_to, setup_to, act_seq, act_dist, begin_times):
 
     ##################
     # initialization #
@@ -663,7 +663,7 @@ def run_simulation(replication_no, output_dir, runs, case, n_vh, n_to, setup_to,
 
     wait_times_nested = [v.q_times for v in vh_dict.values() if v.q_times]
     wait_times = [item for sublist in wait_times_nested for item in sublist]
-    if not wait_times:  wait_times = 0
+    if not wait_times: wait_times = 0
     summary_qus = pd.Series(wait_times, name='Q Duration').describe()
     summary_qus = summary_qus.fillna(0)
 
