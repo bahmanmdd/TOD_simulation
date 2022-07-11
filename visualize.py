@@ -29,10 +29,10 @@ def plot_results(states_vh_df, states_to_df, queues_df, output_dir, replication_
     ax3.set(xlim=[-0.5, duration])
     ax4.set(xlim=[-0.5, duration])
 
-    ax1.set(ylim=[-0.5, n_vh + 1])
-    ax2.set(ylim=[-0.5, n_vh - n_to + 1])
-    ax3.set(ylim=[-0.5, n_vh + 1])
-    ax4.set(ylim=[-0.5, n_to + 1])
+    ax1.set(ylim=[-n_vh*0.05, n_vh + (n_vh*0.05)])
+    ax2.set(ylim=[-(n_vh - n_to)*0.05, n_vh - n_to + (n_vh - n_to)*0.05])
+    ax3.set(ylim=[-n_vh*0.05, n_vh + (n_vh*0.05)])
+    ax4.set(ylim=[-n_to*0.05, n_to + (n_to*0.05)])
 
     ax1.hlines(y=n_vh, colors='gray', linestyles='--', xmin=-0.5, xmax=duration, label='Fleet size')
     ax3.hlines(y=n_vh, colors='gray', linestyles='--', xmin=-0.5, xmax=duration, label='Fleet size')
@@ -55,7 +55,7 @@ def plot_results(states_vh_df, states_to_df, queues_df, output_dir, replication_
 
     lines1 = ax1.plot(states_vh_df['Moving'], 'royalblue')
     lines2 = ax2.plot(queues_df.iloc[:, 1], 'm')
-    lines3 = ax3.plot(states_vh_df.iloc[:, 1:-1])
+    lines3 = ax3.plot(states_vh_df.iloc[:, 1:-1], ['r', 'm', 'royalblue'])
     lines4 = ax4.plot(states_to_df)
 
     lines1[0].set_label('Moving')
@@ -105,10 +105,10 @@ def plot_summary(states_vh_df, states_to_df, queues_df, output_dir, replication_
     ax3.set(xlim=[-0.5, duration])
     ax4.set(xlim=[-0.5, duration])
 
-    ax1.set(ylim=[-0.5, n_vh + 1])
-    ax2.set(ylim=[-0.5, n_vh - n_to + 1])
-    ax3.set(ylim=[-0.5, n_vh + 1])
-    ax4.set(ylim=[-0.5, n_to + 1])
+    ax1.set(ylim=[-n_vh*0.05, n_vh + (n_vh*0.05)])
+    ax2.set(ylim=[-(n_vh - n_to)*0.05, n_vh - n_to + (n_vh - n_to)*0.05])
+    ax3.set(ylim=[-n_vh*0.05, n_vh + (n_vh*0.05)])
+    ax4.set(ylim=[-n_to*0.05, n_to + (n_to*0.05)])
 
     ax1.hlines(y=n_vh, colors='gray', linestyles='--', xmin=-0.5, xmax=duration, label='Fleet size')
     ax4.hlines(y=n_to, colors='whitesmoke', linestyles='--', xmin=-0.5, xmax=duration, label='Available TO')
@@ -137,7 +137,7 @@ def plot_summary(states_vh_df, states_to_df, queues_df, output_dir, replication_
 
     lines1 = ax1.plot(states_vh_df['Moving'], 'royalblue')
     lines2 = ax2.plot(queues_df.iloc[:, 1], 'm')
-    lines3 = ax3.plot(states_vh_df.iloc[:, 1:-1])
+    lines3 = ax3.plot(states_vh_df.iloc[:, 1:-1], ['r', 'm', 'royalblue'])
     lines4 = ax4.plot(states_to_df)
 
     lines1[0].set_label('Moving')
