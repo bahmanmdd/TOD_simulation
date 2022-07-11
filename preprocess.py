@@ -65,7 +65,7 @@ def simulation_input(carrier_prop, max_tour_len, region):
     act_dist = [list(chain(*x)) for x in temp2.values]
 
     for v in range(len(vid)):
-        act_seq[v] = ['buffer', 'TO Queue', 'Moving'] * tour_len[v]
+        act_seq[v] = ['Buffer', 'TO Queue', 'Moving'] * tour_len[v]
         act_seq[v].insert(0, 'Signed in')
         act_seq[v].append('Signed off')
         act_dist[v].insert(0, begin_times_np[v])
