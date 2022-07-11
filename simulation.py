@@ -129,7 +129,7 @@ def run_simulation(replication_no, output_dir, runs, case, n_vh, n_to, setup_to,
         vehicle.stage = -1
 
     # sort event list
-    event_list = event_list.sort_values(by=['Begin'])
+    event_list = event_list.sort_values(by=['Begin', 'End'])
     event_log = event_list
 
     ##############
@@ -397,6 +397,7 @@ def run_simulation_np(replication_no, output_dir, runs, case, n_vh, n_to, setup_
     qs_list = list(dict.fromkeys(['Vehicles_waiting', 'Queue_length']))
     st_list_to = list(dict.fromkeys(['Idle', 'Busy']))
     extra_event = None
+    next_event = None
     extra_activity = None
 
     # instantaneous states & queues
@@ -418,14 +419,13 @@ def run_simulation_np(replication_no, output_dir, runs, case, n_vh, n_to, setup_
     simulation_time = 0
     simulation_clock = 0
     names = {'Begin': 0, 'Duration': 1, 'End': 2, 'Event': 3, 'Activity': 4, 'Vehicle': 5, 'TO': 6}
-    event_list = np.empty([n_vh, len(names)])
+    event_list = []
 
     #################
     # time 0 events #
     #################
 
     # create first events (sign ins) and add to event list
-    v_count = 0
     for vehicle in vh_dict.values():
         vehicle.stage = 0
         first_activity = vehicle.get_current_activity(simulation_time)
@@ -436,12 +436,12 @@ def run_simulation_np(replication_no, output_dir, runs, case, n_vh, n_to, setup_
                                 first_activity[3],
                                 vehicle.vid,
                                 vehicle.toid])
-        event_list[v_count] = first_event
-        v_count = v_count + 1
+        event_list.append(first_event)
         vehicle.stage = -1
 
     # sort event list
-    event_list = event_list[event_list[:, 0].argsort()]
+    event_list = np.array(event_list)
+    event_list = event_list[np.lexsort((event_list[:, 2], event_list[:, 0]))]
     event_log = event_list
 
     ##############
@@ -574,7 +574,7 @@ def run_simulation_np(replication_no, output_dir, runs, case, n_vh, n_to, setup_
                 next_activity = vehicle.get_next_activity(simulation_time)
 
             # create next event to add to event list
-            if next_activity:
+            if next_activity is not None:
                 next_event = np.array([next_activity[0],
                                        next_activity[1],
                                        next_activity[2],
@@ -591,17 +591,17 @@ def run_simulation_np(replication_no, output_dir, runs, case, n_vh, n_to, setup_
         ###############
 
         # eliminate done event & add next event to event list
-        if next_event:
+        if next_event is not None:
             event_list[0, :] = next_event
             event_log = np.append(event_log, [next_event], axis=0)
             # sort event list
             event_list = event_list[event_list[:, names['Event']].argsort()[::-1]]
-            event_list = event_list[event_list[:, names['Begin']]]
+            event_list = event_list[np.argsort(event_list[:, names['Begin']])]
         else:
             event_list = event_list[1:]
 
         # add moving event for the first vehicle in Q
-        if extra_event:
+        if extra_event is not None:
             row = []
             row.insert(0, extra_event)
             event_list = np.vstack([row, event_list])
@@ -723,7 +723,7 @@ if __name__ == "__main__":
     for r in range(runs):
         # run simulation
         print('Running replication {0}'.format(r + 1))
-        utl, sts, cnt, qus, srt = run_simulation(r + 1, output_dir, runs, case, n_vh, n_to, setup_to, act_seq, act_dist, begin_times)
+        utl, sts, cnt, qus, srt = run_simulation_np(r + 1, output_dir, runs, case, n_vh, n_to, setup_to, act_seq, act_dist, begin_times)
 
         # record stats
         if r == 0:

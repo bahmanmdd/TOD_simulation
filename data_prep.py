@@ -7,7 +7,7 @@ import numpy as np
 def simulation_input():
 
     # turn these into input parameters
-    carrier_prop = 0.1
+    carrier_prop = 0.005
     max_tour_len = math.inf
     region = [-math.inf, math.inf, -math.inf, math.inf]
 
@@ -16,6 +16,12 @@ def simulation_input():
 
     # fileter data based on maximum tour length
     data = data[data['TRIP_ARRTIME'] < max_tour_len]
+
+    # fix id issues
+    data['CARRIER_ID'] = data['CARRIER_ID'].astype(int)
+    data['TOUR_ID'] = data['TOUR_ID'].apply(lambda x: (int(x.split('_')[-2]), int(x.split('_')[-1])))
+    data['TRIP_ID'] = data['TRIP_ID'].apply(lambda x: int(x.split('_')[-1]))
+
     # filter based on the proportion of carriers to include in study
     carriers = data['CARRIER_ID'].unique()
     data = data[data['CARRIER_ID'].isin(carriers[:int(len(carriers)*carrier_prop)])]
@@ -24,10 +30,6 @@ def simulation_input():
     data = data[(region[0] <= data['X_DEST']) & (data['X_DEST'] <= region[1])]
     data = data[(region[2] <= data['Y_DEST']) & (data['Y_DEST'] <= region[3])]
     data = data[(region[2] <= data['Y_ORIG']) & (data['Y_ORIG'] <= region[3])]
-
-    data['CARRIER_ID'] = data['CARRIER_ID'].astype(int)
-    data['TOUR_ID'] = data['TOUR_ID'].apply(lambda x: int(x.split('_')[-1]))
-    data['TRIP_ID'] = data['TRIP_ID'].apply(lambda x: int(x.split('_')[-1]))
 
     # sort data
     data = data.sort_values(by=['TOUR_DEPTIME', 'CARRIER_ID', 'TOUR_ID', 'TRIP_ID'])
