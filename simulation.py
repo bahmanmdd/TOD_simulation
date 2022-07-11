@@ -6,30 +6,11 @@ main package for simulation of shipping processes
 import math
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
-import warnings
 import os
 from datetime import datetime
 import data_prep
-# suppress warnings
 import visualize
-
-warnings.filterwarnings("ignore")
-plt.ioff()
-
-
-def get_parameters(n_vh):
-    """ simulation parameters """
-
-    runs = 1
-    case = 'full'
-
-    to2v = 0.1
-    su_t = 0
-
-    n_to = int(round(n_vh * to2v))
-
-    return runs, case, n_vh, n_to, su_t
+import stats
 
 
 class Vehicle(object):
@@ -386,7 +367,6 @@ def run_simulation(replication_no, output_dir, runs, case, n_vh, n_to, setup_to,
     return summary_utl, summary_sts, summary_cnt, summary_qus, states_vh_df.index[-1]
 
 
-
 if __name__ == "__main__":
 
     Begin_dp = datetime.now()
@@ -398,10 +378,16 @@ if __name__ == "__main__":
     print('Dara preprocessing run time: ')
     print(datetime.now() - Begin_dp)
 
-    runs, case, n_vh, n_to, setup_to = get_parameters(n_vh)
+    ## simulation scenario parameters
+    runs = 1
+    case = 'full'
+    to2v = 0.1
+    setup_to = 0
+    n_to = int(round(n_vh * to2v))
 
     # create output directory (if it does not exist already)
-    output_dir = 'Output/' + case + '_v-{}'.format(n_vh) + '_to2v-{:.2f}'.format(n_to/n_vh) + '_su-{}'.format(setup_to) + '_R-{}'.format(runs)
+    output_dir = 'Output/' + case + '_v-{}'.format(n_vh) + \
+                 '_to2v-{:.2f}'.format(n_to/n_vh) + '_su-{}'.format(setup_to) + '_R-{}'.format(runs)
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
@@ -436,21 +422,4 @@ if __name__ == "__main__":
     print((datetime.now() - Begin) / runs)
 
     # save summary stats
-    utilizations.index = utilizations.index + 1
-    summary_utilization = utilizations.describe()
-    summary_status = statuses.groupby('level_1').mean()
-    summary_status.index = summary_status.index.str.strip()
-    summary_status = summary_status.reindex(['count', 'mean', 'std', 'min', '25%', '50%', '75%', 'max'])
-    summary_count = counts.describe()
-    summary_queue = queues.describe()
-    summary_times = pd.Series(times, name='Duration').describe()
-
-    summary_utilization.transpose().rename(columns={'count': 'replications'}, inplace=False).to_excel(
-        output_dir + '/R_0_summary_utilization.xlsx')
-    summary_status.transpose().to_excel(output_dir + '/R_0_summary_status.xlsx')
-    summary_count.transpose().rename(columns={'count': 'replications'}, inplace=False).to_excel(
-        output_dir + '/R_0_summary_count.xlsx')
-    summary_queue.to_excel(output_dir + '/R_0_summary_queues.xlsx')
-    summary_times.to_excel(output_dir + '/R_0_summary_times.xlsx')
-
-    utilizations.to_csv(output_dir + '/R_0_full_utilization.csv', index_label='Replication')
+    stats.save_summary(utilizations, statuses, counts, queues, times, output_dir)
