@@ -7,7 +7,7 @@ import numpy as np
 def simulation_input():
 
     # turn these into input parameters
-    carrier_prop = 0.005
+    carrier_prop = 0.01
     max_tour_len = math.inf
     region = [-math.inf, math.inf, -math.inf, math.inf]
 
@@ -76,7 +76,7 @@ def simulation_input():
         act_dist[v].insert(0, begin_times_np[v])
         act_dist[v].append(math.inf)
 
-    return n_vh, act_seq, act_dist, begin_times_np
+    return n_vh, act_seq, act_dist
 
     # for testing and validation
     # np.array_equal(temp2.index.values, input_data['vehicle_id'].unique())
