@@ -1,5 +1,5 @@
 """
-main package for simulation of shipping processes
+main package for simulation of teleoperated driving in shipping processes
 """
 
 # import packages
@@ -378,9 +378,9 @@ if __name__ == "__main__":
     ## simulation scenario parameters
     runs = 1
     case = 'full'
-    to2v_ratio = 0.1
-    takeover_time = 0
-    carrier_proportion = 0.01
+    # to2v_ratio = 0.1
+    # takeover_time = 0
+    # carrier_proportion = 0.01
     max_tour_len = math.inf
     region = [-math.inf, math.inf, -math.inf, math.inf]
 
@@ -392,16 +392,16 @@ if __name__ == "__main__":
     carrier_proportion_list = [0.01, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]
     carrier_proportion_list = [0.05]
 
-    Begin_dp = datetime.now()
-
-    # run data preprocessing and return simulation input
-    n_vh, act_seq, act_dist = preprocess.simulation_input(carrier_proportion, max_tour_len, region)
-
-    # report data processing run time
-    print('Dara preprocessing run time: ')
-    print(datetime.now() - Begin_dp)
-
+    # batch scenario runs
     for carrier_proportion in carrier_proportion_list:
+
+        Begin_dp = datetime.now()
+        # run data preprocessing and return simulation input
+        n_vh, act_seq, act_dist = preprocess.simulation_input(carrier_proportion, max_tour_len, region)
+        # report data processing run time
+        print('Data preprocessing time: ')
+        print(datetime.now() - Begin_dp)
+
         for to2v_ratio in to2v_ratio_list:
             for takeover_time in takeover_time_list:
 
@@ -443,10 +443,11 @@ if __name__ == "__main__":
                         times.append(srt)
 
                 # report simulation run time
-                print('\nSimulation run time for {0} run(s): '.format(runs))
+                print('Simulation run time for {0} run(s): '.format(runs))
                 print(datetime.now() - Begin)
-                print('\nReplication run time: ')
+                print('Replication run time: ')
                 print((datetime.now() - Begin) / runs)
+                print('\n********************')
 
                 # save summary stats
                 report.stats_summary(utilizations, statuses, counts, queues, times, output_dir)
