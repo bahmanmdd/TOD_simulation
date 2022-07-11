@@ -55,7 +55,7 @@ def plot_results(states_vh_df, states_to_df, queues_df, output_dir, replication_
 
     lines1 = ax1.plot(states_vh_df['Moving'], 'royalblue')
     lines2 = ax2.plot(queues_df.iloc[:, 1], 'm')
-    lines3 = ax3.plot(states_vh_df.iloc[:, 1:-1], ['r', 'm', 'royalblue'])
+    lines3 = ax3.plot(states_vh_df.iloc[:, 1:-1])
     lines4 = ax4.plot(states_to_df)
 
     lines1[0].set_label('Moving')
@@ -64,6 +64,10 @@ def plot_results(states_vh_df, states_to_df, queues_df, output_dir, replication_
         lines3[i].set_label(states_vh_df.columns[i + 1])
     for i in range(len(lines4)):
         lines4[i].set_label(states_to_df.columns[i])
+
+    lines3[0].set_color('g')
+    lines3[1].set_color('m')
+    lines3[2].set_color('royalblue')
 
     ax1.legend()
     ax2.legend()
@@ -137,7 +141,7 @@ def plot_summary(states_vh_df, states_to_df, queues_df, output_dir, replication_
 
     lines1 = ax1.plot(states_vh_df['Moving'], 'royalblue')
     lines2 = ax2.plot(queues_df.iloc[:, 1], 'm')
-    lines3 = ax3.plot(states_vh_df.iloc[:, 1:-1], ['r', 'm', 'royalblue'])
+    lines3 = ax3.plot(states_vh_df.iloc[:, 1:-1])
     lines4 = ax4.plot(states_to_df)
 
     lines1[0].set_label('Moving')
@@ -146,6 +150,10 @@ def plot_summary(states_vh_df, states_to_df, queues_df, output_dir, replication_
         lines3[i].set_label(states_vh_df.columns[i + 1])
     for i in range(len(lines4)):
         lines4[i].set_label(states_to_df.columns[i])
+
+    lines3[0].set_color('g')
+    lines3[1].set_color('m')
+    lines3[2].set_color('royalblue')
 
     ax1.legend(loc='upper right', bbox_to_anchor=(1.35, 1), fontsize='small')
     ax2.legend(loc='upper right', bbox_to_anchor=(1.35, 1), fontsize='small')
