@@ -85,9 +85,8 @@ def run_simulation(replication_no, output_dir, runs, case, n_vh, n_to, setup_to,
 
     # clock & event list
     simulation_time = 0
-    simulation_clock = 0
-    names = {'Begin': 0, 'Duration': 1, 'End': 2, 'Event': 3, 'Activity': 4, 'Vehicle': 5, 'TO': 6}
     event_list = []
+    names = {'Begin': 0, 'Duration': 1, 'End': 2, 'Event': 3, 'Activity': 4, 'Vehicle': 5, 'TO': 6}
 
     #################
     # time 0 events #
@@ -169,7 +168,10 @@ def run_simulation(replication_no, output_dir, runs, case, n_vh, n_to, setup_to,
                         queues_to_leng = len(queues_to_list)
                         vehicle.q_times[-1] = simulation_time - vehicle.q_times[-1]
                     # create current activity with default TO setup time (to be added to event list later)
-                    current_activity = (simulation_time, setup_to, simulation_time + setup_to, current_event[names['Activity']])
+                    current_activity = (simulation_time,
+                                        setup_to,
+                                        simulation_time + setup_to,
+                                        current_event[names['Activity']])
 
                 # when no TO is available
                 else:
@@ -179,14 +181,18 @@ def run_simulation(replication_no, output_dir, runs, case, n_vh, n_to, setup_to,
                     vehicle.toid = None
                     vehicle.q_times.append(simulation_time)
                     # create current activity with duration 0 (to be added to event list later)
-                    current_activity = (simulation_time, 0, simulation_time, current_event[names['Activity']])
+                    current_activity = (simulation_time,
+                                        0,
+                                        simulation_time,
+                                        current_event[names['Activity']])
 
             # other activities
             else:
                 # create current activity (to be added to event list later)
-                current_activity = (
-                simulation_time, current_event[names['Duration']], simulation_time + current_event[names['Duration']],
-                current_event[names['Activity']])
+                current_activity = (simulation_time,
+                                    current_event[names['Duration']],
+                                    simulation_time + current_event[names['Duration']],
+                                    current_event[names['Activity']])
 
             # create next event to add to event list
             next_event = np.array([current_activity[2],
@@ -369,25 +375,28 @@ def run_simulation(replication_no, output_dir, runs, case, n_vh, n_to, setup_to,
 
 if __name__ == "__main__":
 
-    Begin_dp = datetime.now()
-
-    # run data preprocessing and return simulation input
-    n_vh, act_seq, act_dist = data_prep.simulation_input()
-
-    # report data processing run time
-    print('Dara preprocessing run time: ')
-    print(datetime.now() - Begin_dp)
-
     ## simulation scenario parameters
     runs = 1
     case = 'full'
     to2v = 0.1
     setup_to = 0
+    carrier_prop = 0.01
+    max_tour_len = math.inf
+    region = [-math.inf, math.inf, -math.inf, math.inf]
+
+    Begin_dp = datetime.now()
+
+    # run data preprocessing and return simulation input
+    n_vh, act_seq, act_dist = data_prep.simulation_input(carrier_prop, max_tour_len, region)
+
+    # report data processing run time
+    print('Dara preprocessing run time: ')
+    print(datetime.now() - Begin_dp)
+
     n_to = int(round(n_vh * to2v))
 
     # create output directory (if it does not exist already)
-    output_dir = 'Output/' + case + '_v-{}'.format(n_vh) + \
-                 '_to2v-{:.2f}'.format(n_to/n_vh) + '_su-{}'.format(setup_to) + '_R-{}'.format(runs)
+    output_dir = 'Output/' + case + '_v-{}'.format(n_vh) + '_to2v-{:.2f}'.format(to2v) + '_su-{}'.format(setup_to) + '_R-{}'.format(runs)
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 

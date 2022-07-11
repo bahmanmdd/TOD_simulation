@@ -4,12 +4,7 @@ import pandas as pd
 import numpy as np
 
 
-def simulation_input():
-
-    # turn these into input parameters
-    carrier_prop = 0.01
-    max_tour_len = math.inf
-    region = [-math.inf, math.inf, -math.inf, math.inf]
+def simulation_input(carrier_prop, max_tour_len, region):
 
     # read data
     data = pd.read_csv('Input/Tours_REF.csv')
