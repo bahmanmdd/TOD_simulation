@@ -446,7 +446,7 @@ if __name__ == "__main__":
                 print(datetime.now() - Begin)
                 print('Replication run time (including data preprocessing): ')
                 print((datetime.now() - Begin) / runs)
-                print('\n*************************************************')
+                print('***************************************************\n')
 
                 # save summary stats
                 report.stats_summary(utilizations, statuses, counts, queues, times, output_dir)
