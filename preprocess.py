@@ -2,6 +2,7 @@ import math
 from itertools import chain
 import pandas as pd
 import numpy as np
+import scipy.stats
 
 
 def simulation_input(carrier_prop, max_tour_len, region):
@@ -31,21 +32,22 @@ def simulation_input(carrier_prop, max_tour_len, region):
     data_np = data.values
 
     # calculate buffer values
-    buffer = np.zeros(len(data_np))
-    for i in range(len(data_np)):
-        if data_np[i, 2] == 0:
-            buffer[i] = data_np[i, 16] - data_np[i, 15]
-        else:
-            buffer[i] = data_np[i, 16] - data_np[i-1, 17]
-    data['buffer'] = buffer
+    # buffer = np.zeros(len(data_np))
+    # for i in range(len(data_np)):
+    #     if data_np[i, 2] == 0:
+    #         buffer[i] = data_np[i, 16] - data_np[i, 15]
+    #     else:
+    #         buffer[i] = data_np[i, 16] - data_np[i-1, 17]
+    # data['buffer'] = buffer
 
     # new df with only values we need
     input_data = pd.DataFrame()
     input_data['vehicle_id'] = data['TOUR_ID']
     input_data['trip_id'] = data['TRIP_ID']
     input_data['tour_departure'] = data['TOUR_DEPTIME'] * 60
-    input_data['buffer_duration'] = data['buffer'] * 60
-    input_data['departure_time'] = data['TRIP_DEPTIME'] * 60
+    # input_data['buffer_duration'] = data['buffer'] * 60
+    rv = scipy.stats.expon(loc=19, scale=1)
+    input_data['buffer_duration'] = rv.rvs(size=len(data['TRIP_ID']))
     input_data['moving_duration'] = (data['TRIP_ARRTIME'] - data['TRIP_DEPTIME']) * 60
 
     begin_times = input_data.groupby(['vehicle_id'], sort=False).first()['tour_departure']
@@ -60,12 +62,12 @@ def simulation_input(carrier_prop, max_tour_len, region):
     temp['vid'] = input_data[['vehicle_id']]
     temp['tid'] = input_data[['trip_id']]
     # only buffer and moving
-    temp['dists'] = input_data[input_data.columns[-3:]].apply(lambda x: [x[0], 0, x[2]], axis=1)
+    temp['dists'] = input_data[input_data.columns[-2:]].apply(lambda x: [x[0], 0, x[1]], axis=1)
     temp2 = temp.groupby(['vid'], sort=False)['dists'].apply(lambda x: list(x[:]))
     act_dist = [list(chain(*x)) for x in temp2.values]
 
     for v in range(len(vid)):
-        act_seq[v] = ['Idling time', 'TO Queue', 'Moving'] * tour_len[v]
+        act_seq[v] = ['Idling', 'TO Queue', 'Moving'] * tour_len[v]
         act_seq[v].insert(0, 'Signed in')
         act_seq[v].append('Signed off')
         act_dist[v].insert(0, begin_times_np[v])

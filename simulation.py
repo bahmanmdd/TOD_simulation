@@ -16,17 +16,17 @@ import report
 def parameters():
 
     ## simulation scenario parameters
-    runs = 2
+    runs = 5
     max_tour_len = math.inf
     region = [-math.inf, math.inf, -math.inf, math.inf]
 
     # lists of parameter options for batch runs
     to2v_ratio_list = np.array(list(range(5, 105, 5))) / 100
-    to2v_ratio_list = [0.1, 0.5]
+    to2v_ratio_list = [0.1, 0.3, 0.5]
     takeover_time_list = [0, 1, 2, 5]
     takeover_time_list = [0, 1]
     carrier_proportion_list = [0.01, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]
-    carrier_proportion_list = [0.005, 0.007]
+    carrier_proportion_list = [0.005]
 
     return runs, max_tour_len, region, to2v_ratio_list, takeover_time_list, carrier_proportion_list
 
@@ -398,18 +398,8 @@ if __name__ == "__main__":
 
     # batch scenario runs
     for carrier_proportion in carrier_proportion_list:
-
-        Begin_dp = datetime.now()
-        # run data preprocessing and return simulation input
-        n_vh, act_seq, act_dist = preprocess.simulation_input(carrier_proportion, max_tour_len, region)
-        # report data processing run time
-        print('Data preprocessing time: ')
-        print(datetime.now() - Begin_dp)
-
         for to2v_ratio in to2v_ratio_list:
             for takeover_time in takeover_time_list:
-
-                n_to = int(round(n_vh * to2v_ratio))
 
                 # create output directory (if it does not exist already)
                 output_dir = 'Output/' + 'cp-{:.3f}'.format(carrier_proportion) + '_to2v-{:.2f}'.format(to2v_ratio) + '_su-{}'.format(takeover_time) + '_R-{}'.format(runs)
@@ -429,6 +419,10 @@ if __name__ == "__main__":
                 print('Number of replications: {}'.format(runs))
                 print('Simulation in progress...')
                 for r in range(runs):
+                    # run data preprocessing and return simulation input
+                    print('Preprocessing for replication {0}'.format(r + 1))
+                    n_vh, act_seq, act_dist = preprocess.simulation_input(carrier_proportion, max_tour_len, region)
+                    n_to = int(round(n_vh * to2v_ratio))
                     # run simulation
                     print('Running replication {0}'.format(r + 1))
                     utl, sts, cnt, qus, srt = run_simulation(r + 1, output_dir, runs, n_vh, n_to, takeover_time, act_seq, act_dist)
@@ -450,9 +444,9 @@ if __name__ == "__main__":
                 # report simulation run time
                 print('Simulation run time for {0} run(s): '.format(runs))
                 print(datetime.now() - Begin)
-                print('Replication run time: ')
+                print('Replication run time (including data preprocessing): ')
                 print((datetime.now() - Begin) / runs)
-                print('\n********************')
+                print('\n*************************************************')
 
                 # save summary stats
                 report.stats_summary(utilizations, statuses, counts, queues, times, output_dir)
