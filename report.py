@@ -62,11 +62,12 @@ def tradeoff_plots(to2v_ratio_list, carrier_proportion_list, takeover_time_list,
 
                 df = df.append(row, ignore_index=True)
 
-                ci_temp = {'TO takeover time': [tot]*runs, 'TO2vehicle ratio': [tov]*runs, 'Replication': [*range(runs)], 'Makespan': ms_temp}
-                ci_data.append(ci_temp, ignore_index=True)
+                ci_temp = {'TO takeover time': [tot]*runs, 'TO2vehicle ratio': [tov]*runs, 'Replication': [*range(runs)], 'Makespan': ms_temp.Makespan.values}
+                ci_data_new = pd.DataFrame(ci_temp)
+                ci_data = pd.concat([ci_data, ci_data_new], ignore_index=True)
 
         sns.lineplot(data=ci_data, x="TO2vehicle ratio", y="Makespan", hue="TO takeover time")
-        plt.savefig(output_dir + '/cp_' + str(cp) + '_avg_q_times.jpeg', dpi=800)
+        plt.savefig(output_dir + '/cp_' + str(cp) + '_makespan.jpeg', dpi=800)
         plt.close()
 
     df = df[['carrier_proportion',

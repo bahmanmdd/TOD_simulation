@@ -421,6 +421,7 @@ if __name__ == "__main__":
                 print('Proportion of carriers included: {}'.format(carrier_proportion))
                 print('Teleoperator to vehicle ratio: {}'.format(to2v_ratio))
                 print('Teleoperator takeover time: {}'.format(takeover_time))
+                print('Number of replications: {}'.format(runs))
                 print('Simulation in progress...')
                 for r in range(runs):
                     # run simulation
