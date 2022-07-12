@@ -376,7 +376,7 @@ def run_simulation(replication_no, output_dir, runs, n_vh, n_to, setup_to, act_s
 if __name__ == "__main__":
 
     ## simulation scenario parameters
-    runs = 1
+    runs = 2
     # to2v_ratio = 0.1
     # takeover_time = 0
     # carrier_proportion = 0.01
@@ -385,11 +385,11 @@ if __name__ == "__main__":
 
     # lists of parameter options for batch runs
     to2v_ratio_list = np.array(list(range(5, 105, 5))) / 100
-    to2v_ratio_list = [0.1, 0.2, 0.3, 0.4, 0.5]
+    to2v_ratio_list = [0.1, 0.5]
     takeover_time_list = [0, 1, 2, 5]
     takeover_time_list = [0, 1]
     carrier_proportion_list = [0.01, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]
-    carrier_proportion_list = [0.01, 0.05]
+    carrier_proportion_list = [0.005, 0.007]
 
     # batch scenario runs
     for carrier_proportion in carrier_proportion_list:
@@ -452,5 +452,5 @@ if __name__ == "__main__":
                 report.stats_summary(utilizations, statuses, counts, queues, times, output_dir)
 
     # create plots to show tradeoffs between queue times and TO2V ratios
-    report.tradeoff_plots(to2v_ratio_list, carrier_proportion_list, takeover_time_list)
+    report.tradeoff_plots(to2v_ratio_list, carrier_proportion_list, takeover_time_list, runs)
 
