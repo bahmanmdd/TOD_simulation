@@ -13,6 +13,24 @@ import visualize
 import report
 
 
+def parameters():
+
+    ## simulation scenario parameters
+    runs = 2
+    max_tour_len = math.inf
+    region = [-math.inf, math.inf, -math.inf, math.inf]
+
+    # lists of parameter options for batch runs
+    to2v_ratio_list = np.array(list(range(5, 105, 5))) / 100
+    to2v_ratio_list = [0.1, 0.5]
+    takeover_time_list = [0, 1, 2, 5]
+    takeover_time_list = [0, 1]
+    carrier_proportion_list = [0.01, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]
+    carrier_proportion_list = [0.005, 0.007]
+
+    return runs, max_tour_len, region, to2v_ratio_list, takeover_time_list, carrier_proportion_list
+
+
 class Vehicle(object):
 
     def __init__(self, vid, toid, stage, status, pattern, distribution, q_times):
@@ -375,21 +393,8 @@ def run_simulation(replication_no, output_dir, runs, n_vh, n_to, setup_to, act_s
 
 if __name__ == "__main__":
 
-    ## simulation scenario parameters
-    runs = 2
-    # to2v_ratio = 0.1
-    # takeover_time = 0
-    # carrier_proportion = 0.01
-    max_tour_len = math.inf
-    region = [-math.inf, math.inf, -math.inf, math.inf]
-
-    # lists of parameter options for batch runs
-    to2v_ratio_list = np.array(list(range(5, 105, 5))) / 100
-    to2v_ratio_list = [0.1, 0.5]
-    takeover_time_list = [0, 1, 2, 5]
-    takeover_time_list = [0, 1]
-    carrier_proportion_list = [0.01, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]
-    carrier_proportion_list = [0.005, 0.007]
+    # parameters
+    runs, max_tour_len, region, to2v_ratio_list, takeover_time_list, carrier_proportion_list = parameters()
 
     # batch scenario runs
     for carrier_proportion in carrier_proportion_list:
