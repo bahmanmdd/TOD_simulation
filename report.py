@@ -20,15 +20,12 @@ def stats_summary(utilizations, statuses, counts, queues, times, output_dir):
     summary_times = pd.Series(times, name='Makespan').describe()
     makespan_dist = pd.Series(times, name='Makespan')
 
-    summary_utilization.transpose().rename(columns={'count': 'replications'}, inplace=False).to_excel(
-        output_dir + '/R_0_summary_utilization.xlsx')
+    summary_utilization.transpose().rename(columns={'count': 'replications'}, inplace=False).to_excel(output_dir + '/R_0_summary_utilization.xlsx')
     summary_status.transpose().to_excel(output_dir + '/R_0_summary_status.xlsx')
-    summary_count.transpose().rename(columns={'count': 'replications'}, inplace=False).to_excel(
-        output_dir + '/R_0_summary_count.xlsx')
+    summary_count.transpose().rename(columns={'count': 'replications'}, inplace=False).to_excel(output_dir + '/R_0_summary_count.xlsx')
     summary_queue.to_excel(output_dir + '/R_0_summary_queues.xlsx')
     summary_times.to_excel(output_dir + '/R_0_summary_makespan.xlsx')
     makespan_dist.to_csv(output_dir + '/R_0_dist_makespan.csv')
-
     utilizations.to_csv(output_dir + '/R_0_full_utilization.csv', index_label='Replication')
 
 
