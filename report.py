@@ -4,7 +4,8 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-plt.style.use("ggplot")
+plt.style.use('seaborn')
+plt.ioff()
 
 
 def stats_summary(utilizations, statuses, counts, queues, times, output_dir):
@@ -67,6 +68,10 @@ def tradeoff_plots(to2v_ratio_list, carrier_proportion_list, takeover_time_list,
                 ci_data = pd.concat([ci_data, ci_data_new], ignore_index=True)
 
         sns.lineplot(data=ci_data, x="TO2vehicle ratio", y="Makespan", hue="TO takeover time")
+        plt.title('Makespan vs Teleoperator-to-vehicle ratio')
+        plt.xlabel('Teleoperator-to-vehicle ratio')
+        plt.ylabel('Makespan (minutes)')
+        # plt.xlim([0, 1])
         plt.savefig(output_dir + '/cp_' + str(cp) + '_makespan.jpeg', dpi=800)
         plt.close()
 
@@ -91,18 +96,21 @@ def tradeoff_plots(to2v_ratio_list, carrier_proportion_list, takeover_time_list,
         df_avg.plot()
         plt.xlabel('Teleoperator-to-vehicle ratio')
         plt.ylabel('Average queue duration (minutes)')
+        plt.xlim([0, 1])
         plt.savefig(output_dir + '/cp_' + str(cp) + '_avg_q_times.jpeg', dpi=800)
         plt.close()
 
         df_max.plot()
         plt.xlabel('Teleoperator-to-vehicle ratio')
         plt.ylabel('Max queue duration (minutes)')
+        plt.xlim([0, 1])
         plt.savefig(output_dir + '/cp_' + str(cp) + '_max_q_times.jpeg', dpi=800)
         plt.close()
 
         df_vav.plot()
         plt.xlabel('Teleoperator-to-vehicle ratio')
         plt.ylabel('Average wait time per vehicle (minutes)')
+        plt.xlim([0, 1])
         plt.savefig(output_dir + '/cp_' + str(cp) + '_avg_vq_times.jpeg', dpi=800)
         plt.close()
 
