@@ -68,7 +68,7 @@ def tradeoff_plots(to2v_ratio_list, carrier_proportion_list, takeover_time_list,
         plt.xlabel('Teleoperator-to-vehicle ratio')
         plt.ylabel('Makespan (minutes)')
         # plt.xlim([0, 1])
-        plt.savefig(output_dir + '/cp_' + str(cp) + '_makespan.jpeg', dpi=800)
+        plt.savefig(output_dir + '/cp_' + str(cp) + '_total-makespan.jpeg', dpi=800)
         plt.close()
 
     df = df[['carrier_proportion',

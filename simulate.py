@@ -15,16 +15,17 @@ import event
 
 
 def parameters():
+
     ## simulation scenario parameters
-    runs = 5
+    runs = 25
     max_tour_len = math.inf
     region = [-math.inf, math.inf, -math.inf, math.inf]
 
     # lists of parameter options for batch runs
     to2v_ratio_list = np.array(list(range(5, 105, 5))) / 100
-    to2v_ratio_list = [0.2, 0.3]
+    to2v_ratio_list = [0.05, 0.10, 0.15, 0.20, 0.25, 0.30]
     takeover_time_list = [0, 1, 2, 5]
-    takeover_time_list = [0, 1]
+    takeover_time_list = [0, 1, 2]
     carrier_proportion_list = [0.01, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]
     carrier_proportion_list = [0.005]
     max_to_duration = 4.5 * 60
