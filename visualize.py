@@ -2,11 +2,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
-import warnings
-from math import *
-
-warnings.filterwarnings("ignore")
-plt.style.use("ggplot")
+plt.style.use('seaborn-paper')
 
 
 def plot_results(states_vh_df, states_to_df, queues_df, output_dir, replication_no, n_vh, n_to):
@@ -29,10 +25,10 @@ def plot_results(states_vh_df, states_to_df, queues_df, output_dir, replication_
     ax3.set(xlim=[-0.5, duration])
     ax4.set(xlim=[-0.5, duration])
 
-    ax1.set(ylim=[-n_vh*0.05, n_vh + (n_vh*0.05)])
-    ax2.set(ylim=[-(n_vh - n_to)*0.05, n_vh - n_to + (n_vh - n_to)*0.05])
-    ax3.set(ylim=[-n_vh*0.05, n_vh + (n_vh*0.05)])
-    ax4.set(ylim=[-n_to*0.05, n_to + (n_to*0.05)])
+    ax1.set(ylim=[-n_vh*0.01, n_vh + (n_vh*0.01)])
+    ax2.set(ylim=[-(n_vh - n_to)*0.01, n_vh - n_to + (n_vh - n_to)*0.01])
+    ax3.set(ylim=[-n_vh*0.01, n_vh + (n_vh*0.01)])
+    ax4.set(ylim=[-n_to*0.01, n_to + (n_to*0.01)])
 
     ax1.hlines(y=n_vh, colors='gray', linestyles='--', xmin=-0.5, xmax=duration, label='Fleet size')
     ax3.hlines(y=n_vh, colors='gray', linestyles='--', xmin=-0.5, xmax=duration, label='Fleet size')
@@ -43,7 +39,7 @@ def plot_results(states_vh_df, states_to_df, queues_df, output_dir, replication_
     ax3.set_xlabel('Simulation Time (minutes)', fontdict={'fontsize': 10})
     ax4.set_xlabel('Simulation Time (minutes)', fontdict={'fontsize': 10})
 
-    ax1.set_ylabel('# Moving vehicles', fontdict={'fontsize': 10})
+    ax1.set_ylabel('# Teleoperated vehicles', fontdict={'fontsize': 10})
     ax2.set_ylabel('TO Queue length', fontdict={'fontsize': 10})
     ax3.set_ylabel('# Vehicles', fontdict={'fontsize': 10})
     ax4.set_ylabel('# TO', fontdict={'fontsize': 10})
@@ -53,12 +49,12 @@ def plot_results(states_vh_df, states_to_df, queues_df, output_dir, replication_
     ax3.tick_params(axis='both', which='major', labelsize=8)
     ax4.tick_params(axis='both', which='major', labelsize=8)
 
-    lines1 = ax1.plot(states_vh_df['Moving'], 'royalblue')
+    lines1 = ax1.plot(states_vh_df['Teleoperated'], 'royalblue')
     lines2 = ax2.plot(queues_df.iloc[:, 1], 'm')
     lines3 = ax3.plot(states_vh_df.iloc[:, 1:-1])
     lines4 = ax4.plot(states_to_df)
 
-    lines1[0].set_label('Moving')
+    lines1[0].set_label('Teleoperated')
     lines2[0].set_label('TO Queue')
     for i in range(len(lines3)):
         lines3[i].set_label(states_vh_df.columns[i + 1])
@@ -122,7 +118,7 @@ def plot_summary(states_vh_df, states_to_df, queues_df, output_dir, replication_
     ax3.set_xlabel('Simulation Time (minutes)', fontdict={'fontsize': 8})
     ax4.set_xlabel('Simulation Time (minutes)', fontdict={'fontsize': 8})
 
-    ax1.set_ylabel('# Moving vehicles', fontdict={'fontsize': 9})
+    ax1.set_ylabel('# Teleoperated vehicles', fontdict={'fontsize': 9})
     ax2.set_ylabel('TO Queue length', fontdict={'fontsize': 9})
     ax3.set_ylabel('# Vehicles', fontdict={'fontsize': 9})
     ax4.set_ylabel('# TO', fontdict={'fontsize': 9})
@@ -139,12 +135,12 @@ def plot_summary(states_vh_df, states_to_df, queues_df, output_dir, replication_
 
     fig.tight_layout()
 
-    lines1 = ax1.plot(states_vh_df['Moving'], 'royalblue')
+    lines1 = ax1.plot(states_vh_df['Teleoperated'], 'royalblue')
     lines2 = ax2.plot(queues_df.iloc[:, 1], 'm')
     lines3 = ax3.plot(states_vh_df.iloc[:, 1:-1])
     lines4 = ax4.plot(states_to_df)
 
-    lines1[0].set_label('Moving')
+    lines1[0].set_label('Teleoperated')
     lines2[0].set_label('TO Queue')
     for i in range(len(lines3)):
         lines3[i].set_label(states_vh_df.columns[i + 1])

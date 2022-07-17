@@ -5,7 +5,7 @@ import numpy as np
 import scipy.stats
 
 
-def simulation_input(carrier_prop, max_tour_len, region):
+def simulation_input(carrier_prop, max_tour_len, region, takeover_time):
 
     # read data
     data = pd.read_csv('Input/Tours_REF.csv')
@@ -51,7 +51,6 @@ def simulation_input(carrier_prop, max_tour_len, region):
     input_data['moving_duration'] = (data['TRIP_ARRTIME'] - data['TRIP_DEPTIME']) * 60
 
     begin_times = input_data.groupby(['vehicle_id'], sort=False).first()['tour_departure']
-    begin_times_np = begin_times.values
 
     vid = input_data['vehicle_id'].unique()
     n_vh = len(vid)
@@ -62,18 +61,16 @@ def simulation_input(carrier_prop, max_tour_len, region):
     temp['vid'] = input_data[['vehicle_id']]
     temp['tid'] = input_data[['trip_id']]
     # only buffer and moving
-    temp['dists'] = input_data[input_data.columns[-2:]].apply(lambda x: [x[0], 0, x[1]], axis=1)
+    temp['dists'] = input_data[input_data.columns[-2:]].apply(lambda x: [x[0], 0, takeover_time, x[1]], axis=1)
     temp2 = temp.groupby(['vid'], sort=False)['dists'].apply(lambda x: list(x[:]))
     act_dist = [list(chain(*x)) for x in temp2.values]
 
     for v in range(len(vid)):
-        act_seq[v] = ['Idling', 'TO Queue', 'Moving'] * tour_len[v]
-        act_seq[v].insert(0, 'Signed in')
+        act_seq[v] = ['Idle', 'TO Queue', 'Takeover', 'Teleoperated'] * tour_len[v]
         act_seq[v].append('Signed off')
-        act_dist[v].insert(0, begin_times_np[v])
-        act_dist[v].append(math.inf)
+        act_dist[v].append(0)
 
-    return n_vh, act_seq, act_dist
+    return n_vh, act_seq, act_dist, begin_times.values
 
     # for testing and validation
     # np.array_equal(temp2.index.values, input_data['vehicle_id'].unique())

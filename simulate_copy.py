@@ -11,7 +11,6 @@ from datetime import datetime
 import preprocess
 import visualize
 import report
-import event
 
 
 def parameters():
@@ -69,9 +68,8 @@ class Teleoperator(object):
         self.status = status
 
 
-def run_simulation(replication_no, output_dir, runs, n_vh, n_to, setup_to, act_seq, act_dist, begin_times,
-                   max_to_duration, rest_short, rest_long):
-
+def run_simulation(replication_no, output_dir, runs, n_vh, n_to, setup_to, act_seq, act_dist, max_to_duration,
+                   rest_short, rest_long):
     ##################
     # initialization #
     ##################
@@ -82,18 +80,17 @@ def run_simulation(replication_no, output_dir, runs, n_vh, n_to, setup_to, act_s
     # initialize variables, lists and objects
     vh_dict = {'V{0}'.format(i + 1): Vehicle('V{0}'.format(i + 1), None, 0, act_seq[i][0], act_seq[i], act_dist[i], [])
                for i in range(n_vh)}
-    to_dict = {'TO{0}'.format(i + 1): Teleoperator('TO{0}'.format(i + 1), 'Idle', None)
-               for i in range(n_to)}
-
-    qs_list = list(dict.fromkeys(['Vehicles_waiting', 'Queue_length']))
+    to_dict = {'TO{0}'.format(i + 1): Teleoperator('TO{0}'.format(i + 1), 'Idle', None) for i in range(n_to)}
     st_list = list(dict.fromkeys([item for sublist in act_seq for item in sublist]))
-    st_list_to = list(dict.fromkeys(['Idle', 'Busy', 'Resting', 'Takeover']))
-
+    qs_list = list(dict.fromkeys(['Vehicles_waiting', 'Queue_length']))
+    st_list_to = list(dict.fromkeys(['Idle', 'Busy', 'Resting']))
+    extra_event = None
+    extra_event_to = None
     next_event = None
-    next_event_to = None
 
     # instantaneous states & queues
     queues_to_list = []
+    queues_to_len = 0
     states_vh = {}
     states_to = {}
     for status in st_list:
@@ -109,14 +106,30 @@ def run_simulation(replication_no, output_dir, runs, n_vh, n_to, setup_to, act_s
     # clock & event list
     simulation_time = 0.0
     event_list = []
-    names = {'Begin': 0, 'Duration': 1, 'End': 2, 'State': 3, 'Event': 4, 'Vehicle': 5, 'TO': 6}
+    names = {'Begin': 0, 'Duration': 1, 'End': 2, 'Event': 3, 'Activity': 4, 'Vehicle': 5, 'TO': 6}
 
     #################
     # time 0 events #
     #################
 
-    # create first events and add to event list
-    event_list, vh_dict = event.create_first_events(simulation_time, event_list, vh_dict, begin_times, names)
+    # create first events (sign ins) and add to event list
+    for vehicle in vh_dict.values():
+        vehicle.stage = 0
+        first_activity = vehicle.get_current_activity(simulation_time)
+        first_event = np.array([first_activity[0],
+                                first_activity[1],
+                                first_activity[2],
+                                0,
+                                first_activity[3],
+                                vehicle.vid,
+                                vehicle.toid])
+        event_list.append(first_event)
+
+    # sort event list
+    event_list = np.array(event_list)
+    event_list[:, :4] = event_list[:, :4].astype(float)
+    event_list = event_list[event_list[:, names['Begin']].argsort()]
+    event_list = event_list[event_list[:, names['End']].argsort()]
     event_log = event_list
 
     ##############
@@ -144,35 +157,171 @@ def run_simulation(replication_no, output_dir, runs, n_vh, n_to, setup_to, act_s
         else:
             teleoperator = None
 
-        #################
-        # process event #
-        #################
+        ################
+        # Start events #
+        ################
+        if current_event[names['Event']] == 0:
 
-        if current_event[names['Event']] == 'Idle':
-            next_event, vehicle = event.process_idle(simulation_time, vehicle, current_event, names)
+            # queueing activity
+            if current_event[names['Activity']] == 'TO Queue':
 
-        elif current_event[names['Event']] == 'TO Queue':
-            next_event, vehicle, teleoperator, queues_to_list = event.process_queue(simulation_time, vehicle, to_dict, queues_to_list, names)
+                # assign TO (if available)
+                teleoperator = next((to for to in to_dict.values() if to.status == 'Idle'), None)
 
-        elif current_event[names['Event']] == 'Takeover':
-            next_event, vehicle = event.process_takeover(simulation_time, vehicle, current_event, names, takeover_time)
+                # when there is a TO available
+                if teleoperator is not None:
+                    current_event[names['Duration']] = 0
+                    teleoperator.status = 'Busy'
+                    teleoperator.vid = vehicle.vid
+                    vehicle.toid = teleoperator.toid
+                    # if the vehicle was in the Q: update Q
+                    if vehicle.vid in queues_to_list:
+                        queues_to_list.remove(vehicle.vid)
+                        queues_to_len = len(queues_to_list)
+                        vehicle.q_times[-1] = simulation_time - vehicle.q_times[-1]
+                    # create current activity with default TO setup time (to be added to event list later)
+                    current_activity = (simulation_time,
+                                        setup_to,
+                                        simulation_time + setup_to,
+                                        current_event[names['Activity']])
 
-        elif current_event[names['Event']] == 'Teleoperated':
-            next_event, vehicle, teleoperator, queues_to_list, vh_dict, next_event_to = event.process_teleoperated(
-                simulation_time, current_event, names, vehicle, teleoperator, queues_to_list, vh_dict, rest_long, rest_short, max_to_duration)
+                # when no TO is available
+                else:
+                    if vehicle.vid not in queues_to_list:
+                        queues_to_list.append(vehicle.vid)
+                    queues_to_len = len(queues_to_list)
+                    vehicle.toid = None
+                    vehicle.q_times.append(simulation_time)
+                    # create current activity with duration 0 (to be added to event list later)
+                    current_activity = (simulation_time,
+                                        0.0,
+                                        simulation_time,
+                                        current_event[names['Activity']])
 
-        elif current_event[names['Event']] == 'Resting':
-            next_event, teleoperator, queues_to_list = event.process_resting(simulation_time, teleoperator, names, queues_to_list, vh_dict)
+            # other activities
+            else:
+                # create current activity (to be added to event list later)
+                current_activity = (simulation_time,
+                                    current_event[names['Duration']],
+                                    simulation_time + current_event[names['Duration']],
+                                    current_event[names['Activity']])
 
-        elif current_event[names['Event']] == 'Signed off':
-            pass
+            # create next event to add to event list
+            next_event = np.array([current_activity[2],
+                                   0.0,
+                                   current_activity[2],
+                                   1.0,
+                                   current_activity[3],
+                                   vehicle.vid,
+                                   vehicle.toid])
+
+        ##############
+        # end events #
+        ##############
+        if current_event[names['Event']] == 1:
+
+            if vehicle and vehicle.status == 'Signed off':
+                continue
+
+            # queueing activity
+            elif current_event[names['Activity']] == 'TO Queue':
+
+                # if TO was assigned in TOQ Start
+                if vehicle.toid and vehicle.toid == teleoperator.toid:
+                    next_activity = vehicle.get_next_activity(simulation_time)
+                    vehicle.increment_stage()
+
+                # if still in queue
+                else:
+                    next_activity = None
+
+            # moving activity
+            elif current_event[names['Activity']] == 'Teleoperated':
+                # release TO
+                vehicle.toid = None
+                teleoperator.vid = None
+                teleoperator.status = 'Resting'
+                next_activity = vehicle.get_next_activity(simulation_time)
+                # define rest duration based on teleoperation len
+                rest_duration = rest_long if current_event[names['Duration']] > max_to_duration else rest_short
+                rest_duration = float(rest_duration)
+                # add teleoperator resting event (it has started already, so only end)
+                extra_event_to = np.array([simulation_time + rest_duration,
+                                           0.0,
+                                           simulation_time + rest_duration,
+                                           1.0,
+                                           'Resting',
+                                           None,
+                                           teleoperator.toid])
+                # if there are vehicles in TOQ, create moving event for the first in Q
+                if queues_to_list:
+                    next_vehicle = vh_dict[queues_to_list[0]]
+                    extra_activity = next_vehicle.get_current_activity(simulation_time)
+                    # create extra event to add to event list
+                    extra_event = np.array([extra_activity[0],
+                                            extra_activity[1],
+                                            extra_activity[2],
+                                            0.0,
+                                            extra_activity[3],
+                                            next_vehicle.vid,
+                                            next_vehicle.toid])
+
+                vehicle.increment_stage()
+
+            # end of teleoperator rest event
+            elif current_event[names['Activity']] == 'Resting':
+                teleoperator.status = 'Idle'
+                next_activity = None
+                teleoperator = None
+
+            # other activities
+            else:
+                # find the next relevant Start (for the same vehicle)
+                next_activity = vehicle.get_next_activity(simulation_time)
+                vehicle.increment_stage()
+
+            # create next event to add to event list
+            if next_activity is not None:
+                next_event = np.array([next_activity[0],
+                                       next_activity[1],
+                                       next_activity[2],
+                                       0.0,
+                                       next_activity[3],
+                                       vehicle.vid,
+                                       vehicle.toid])
+            else:
+                # in case the vehicle is still in TOQ
+                next_event = None
 
         ###############
         # after event #
         ###############
 
-        # update event list
-        event_list, event_log, next_event, next_event_to = event.update_event_list(event_list, event_log, next_event, next_event_to, names)
+        # eliminate done event & add next event to event list
+        if next_event is not None:
+            event_list[0] = next_event
+            event_log = np.concatenate((event_log, [next_event]))
+        else:
+            event_list = event_list[1:]
+
+        # add moving event for the first vehicle in Q
+        if extra_event is not None:
+            event_list = np.concatenate(([extra_event], event_list))
+            event_log = np.concatenate((event_log, [extra_event]))
+            extra_activity = None
+            extra_event = None
+
+        # add teleoperator resting event (end) to event list
+        if extra_event_to is not None:
+            event_list = np.concatenate(([extra_event_to], event_list))
+            event_log = np.concatenate((event_log, [extra_event_to]))
+            extra_event_to = None
+
+        # sort event list
+        event_list[:, :4] = event_list[:, :4].astype(float)
+        event_list = event_list[event_list[:, names['Begin']].argsort()]
+        event_list = event_list[event_list[:, names['Event']].argsort()]
+        event_list = event_list[event_list[:, names['End']].argsort()]
 
         # update stats
         for status in st_list:
@@ -181,7 +330,7 @@ def run_simulation(replication_no, output_dir, runs, n_vh, n_to, setup_to, act_s
             states_to[status] = sum(to.status == status for to in to_dict.values())
         states_vh_df.loc[simulation_time] = states_vh
         states_to_df.loc[simulation_time] = states_to
-        queues_df.loc[simulation_time, qs_list[1]] = len(queues_to_list)
+        queues_df.loc[simulation_time, qs_list[1]] = queues_to_len
 
         # check for termination conditions
         if all(v.status == 'Signed off' for v in vh_dict.values()):
@@ -202,21 +351,21 @@ def run_simulation(replication_no, output_dir, runs, n_vh, n_to, setup_to, act_s
 
     # sort event log
     event_log = event_log.sort_values(by=['Begin'], ascending=[True])
-    event_log = event_log.query('State!=0')
-    mask = np.logical_and(event_log['Event'] == 'TO Queue', event_log['Duration'] == 0)
+    event_log = event_log.query('Event!="End"')
+    mask = np.logical_and(event_log['Activity'] == 'TO Queue', event_log['Duration'] == 0)
     event_log = event_log.loc[~mask]
-    event_log = event_log.drop('State', axis=1)
+    event_log = event_log.drop('Event', axis=1)
 
     # status summaries
-    event_tmp = event_log[['Event', 'Duration']]
-    event_tmp = event_tmp.query('Event != "Signed in"')
+    event_tmp = event_log[['Activity', 'Duration']]
+    event_tmp = event_tmp.query('Activity != "Signed in"')
     event_tmp.Duration = pd.to_numeric(event_tmp.Duration)
-    summary_sts = event_tmp.groupby('Event').describe()
+    summary_sts = event_tmp.groupby('Activity').describe()
     summary_cnt = summary_sts.iloc[:, 0] / n_vh
 
     # utilization rates
     event_log['Duration'] = pd.to_numeric(event_log['Duration'])
-    utilization_vh_avg = np.sum(event_log.query('Event=="Teleoperated"')['Duration']) / (n_mins * n_vh)
+    utilization_vh_avg = np.sum(event_log.query('Activity=="Teleoperated"')['Duration']) / (n_mins * n_vh)
     utilization_to_avg = np.sum(event_log[event_log['TO'].str.contains('TO', regex=False)]['Duration']) / (
             n_mins * n_to)
 
@@ -295,12 +444,12 @@ if __name__ == "__main__":
                 for r in range(runs):
                     # run data preprocessing and return simulation input
                     print('Preprocessing for replication {0}'.format(r + 1))
-                    n_vh, act_seq, act_dist, begin_times = preprocess.simulation_input(carrier_proportion, max_tour_len, region, takeover_time)
+                    n_vh, act_seq, act_dist = preprocess.simulation_input(carrier_proportion, max_tour_len, region)
                     n_to = int(round(n_vh * to2v_ratio))
                     # run simulation
                     print('Running replication {0}'.format(r + 1))
                     utl, sts, cnt, qus, srt = run_simulation(r + 1, output_dir, runs, n_vh, n_to, takeover_time,
-                                                             act_seq, act_dist, begin_times, max_to_duration, rest_short, rest_long)
+                                                             act_seq, act_dist, max_to_duration, rest_short, rest_long)
 
                     # record stats
                     if r == 0:
