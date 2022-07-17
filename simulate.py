@@ -202,10 +202,7 @@ def run_simulation(replication_no, output_dir, runs, n_vh, n_to, setup_to, act_s
     event_log = pd.DataFrame(event_log.astype(str), columns=names.keys())
 
     # sort event log
-    event_log = event_log.sort_values(by=['Begin'], ascending=[True])
-    event_log = event_log.query('State!=0')
-    mask = np.logical_and(event_log['Event'] == 'TO Queue', event_log['Duration'] == 0)
-    event_log = event_log.loc[~mask]
+    event_log = event_log.sort_values(by=['Begin'])
     event_log = event_log.drop('State', axis=1)
 
     # status summaries
