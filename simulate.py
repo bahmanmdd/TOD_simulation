@@ -295,7 +295,7 @@ if __name__ == "__main__":
                 print('Simulation in progress...')
                 for r in range(runs):
                     # run data preprocessing and return simulation input
-                    print('Preprocessing for replication {0}'.format(r + 1))
+                    print('Data preprocessing...')
                     n_vh, act_seq, act_dist, begin_times = preprocess.simulation_input(carrier_proportion, max_tour_len, region, takeover_time)
                     n_to = int(round(n_vh * to2v_ratio))
                     # run simulation

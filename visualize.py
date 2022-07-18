@@ -2,10 +2,11 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
-plt.style.use('seaborn-whitegrid')
+plt.style.use('seaborn')
 
 
 def plot_results(states_vh_df, states_to_df, queues_df, output_dir, replication_no, n_vh, n_to):
+
     plt.close("all")
 
     duration = states_vh_df.index[-1]
@@ -51,7 +52,7 @@ def plot_results(states_vh_df, states_to_df, queues_df, output_dir, replication_
 
     lines1 = ax1.plot(states_vh_df['Teleoperated'], 'royalblue', alpha=0.7)
     lines2 = ax2.plot(queues_df.iloc[:, 1], 'm', alpha=0.7)
-    lines3 = ax3.plot(states_vh_df.iloc[:, 1:-1], alpha=0.7)
+    lines3 = ax3.plot(states_vh_df.iloc[:, 1:-1][::-1], alpha=0.7)
     lines4 = ax4.plot(states_to_df, alpha=0.7)
 
     lines1[0].set_label('Teleoperated')
@@ -61,9 +62,14 @@ def plot_results(states_vh_df, states_to_df, queues_df, output_dir, replication_
     for i in range(len(lines4)):
         lines4[i].set_label(states_to_df.columns[i])
 
-    lines3[0].set_color('g')
-    lines3[1].set_color('m')
+    lines3[0].set_color('m')
+    lines3[1].set_color('g')
     lines3[2].set_color('royalblue')
+
+    lines4[3].set_color('y')
+    lines4[2].set_color('g')
+    lines4[1].set_color('orange')
+    lines4[0].set_color('b')
 
     ax1.legend()
     ax2.legend()
@@ -88,16 +94,16 @@ def plot_summary(states_vh_df, states_to_df, queues_df, output_dir, replication_
     duration = states_vh_df.index[-1]
 
     fig = plt.figure()
-    fig.patch.set_facecolor('whitesmoke')
+    fig.patch.set_facecolor('gold')
 
     ax1 = fig.add_subplot(2, 2, 1)
     ax2 = fig.add_subplot(2, 2, 2)
     ax3 = fig.add_subplot(2, 2, 3)
     ax4 = fig.add_subplot(2, 2, 4)
 
-    ax1.set_facecolor('lightcyan')
+    ax1.set_facecolor('white')
     ax2.set_facecolor('darkslategray')
-    ax3.set_facecolor('lightcyan')
+    ax3.set_facecolor('white')
     ax4.set_facecolor('darkslategray')
 
     ax1.set(xlim=[-0.5, duration])
@@ -147,9 +153,14 @@ def plot_summary(states_vh_df, states_to_df, queues_df, output_dir, replication_
     for i in range(len(lines4)):
         lines4[i].set_label(states_to_df.columns[i])
 
-    lines3[0].set_color('g')
-    lines3[1].set_color('m')
+    lines3[0].set_color('m')
+    lines3[1].set_color('g')
     lines3[2].set_color('royalblue')
+
+    lines4[0].set_color('b')
+    lines4[1].set_color('orange')
+    lines4[2].set_color('g')
+    lines4[3].set_color('y')
 
     ax1.legend(loc='upper right', bbox_to_anchor=(1.35, 1), fontsize='small')
     ax2.legend(loc='upper right', bbox_to_anchor=(1.35, 1), fontsize='small')
