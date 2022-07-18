@@ -23,11 +23,11 @@ def parameters():
 
     # lists of parameter options for batch runs
     to2v_ratio_list = np.array(list(range(5, 105, 5))) / 100
-    to2v_ratio_list = [0.5, 0.10, 0.15, 0.20]
+    to2v_ratio_list = [0.05, 0.10]
     takeover_time_list = [0, 1, 2, 5]
-    takeover_time_list = [0, 5]
+    takeover_time_list = [5, 0]
     carrier_proportion_list = [0.01, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]
-    carrier_proportion_list = [0.01]
+    carrier_proportion_list = [0.005]
     max_to_duration = 4.5 * 60
     rest_short = 10
     rest_long = 45

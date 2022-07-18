@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-plt.style.use('seaborn-whitegrid')
+plt.style.use('seaborn')
 
 
 def stats_summary(utilizations, statuses, counts, queues, times, output_dir):
@@ -63,7 +63,7 @@ def tradeoff_plots(to2v_ratio_list, carrier_proportion_list, takeover_time_list,
                 ci_data_new = pd.DataFrame(ci_temp)
                 ci_data = pd.concat([ci_data, ci_data_new], ignore_index=True)
 
-        sns.lineplot(data=ci_data, x="TO2vehicle ratio", y="Makespan", hue="TO takeover time")
+        sns.lineplot(data=ci_data, x="TO2vehicle ratio", y="Makespan", hue="TO takeover time", alpha=0.7)
         plt.title('Makespan vs Teleoperator-to-vehicle ratio')
         plt.xlabel('Teleoperator-to-vehicle ratio')
         plt.ylabel('Makespan (minutes)')

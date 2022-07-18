@@ -49,10 +49,10 @@ def plot_results(states_vh_df, states_to_df, queues_df, output_dir, replication_
     ax3.tick_params(axis='both', which='major', labelsize=8)
     ax4.tick_params(axis='both', which='major', labelsize=8)
 
-    lines1 = ax1.plot(states_vh_df['Teleoperated'], 'royalblue')
-    lines2 = ax2.plot(queues_df.iloc[:, 1], 'm')
-    lines3 = ax3.plot(states_vh_df.iloc[:, 1:-1])
-    lines4 = ax4.plot(states_to_df)
+    lines1 = ax1.plot(states_vh_df['Teleoperated'], 'royalblue', alpha=0.7)
+    lines2 = ax2.plot(queues_df.iloc[:, 1], 'm', alpha=0.7)
+    lines3 = ax3.plot(states_vh_df.iloc[:, 1:-1], alpha=0.7)
+    lines4 = ax4.plot(states_to_df, alpha=0.7)
 
     lines1[0].set_label('Teleoperated')
     lines2[0].set_label('TO Queue')
@@ -88,7 +88,7 @@ def plot_summary(states_vh_df, states_to_df, queues_df, output_dir, replication_
     duration = states_vh_df.index[-1]
 
     fig = plt.figure()
-    fig.patch.set_facecolor('orange')
+    fig.patch.set_facecolor('whitesmoke')
 
     ax1 = fig.add_subplot(2, 2, 1)
     ax2 = fig.add_subplot(2, 2, 2)

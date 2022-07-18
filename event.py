@@ -117,9 +117,9 @@ def process_takeover(simulation_time, vehicle, current_event, names, takeover_ti
     if current_event[names['State']] == 0:
 
         # create the end of takeover event
-        next_event = np.array([current_event[names['Begin']],
-                               float(takeover_time),
-                               current_event[names['Begin']] + float(takeover_time),
+        next_event = np.array([current_event[names['End']],
+                               0.0,
+                               current_event[names['End']],
                                1.0,
                                current_event[names['Event']],
                                current_event[names['Vehicle']],
