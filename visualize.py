@@ -39,10 +39,10 @@ def plot_results(states_vh_df, states_to_df, queues_df, output_dir, replication_
     ax3.set_xlabel('Simulation Time (minutes)', fontdict={'fontsize': 10})
     ax4.set_xlabel('Simulation Time (minutes)', fontdict={'fontsize': 10})
 
-    ax1.set_ylabel('# Teleoperated vehicles', fontdict={'fontsize': 10})
+    ax1.set_ylabel('Number of Teleoperated vehicles', fontdict={'fontsize': 10})
     ax2.set_ylabel('TO Queue length', fontdict={'fontsize': 10})
-    ax3.set_ylabel('# Vehicles', fontdict={'fontsize': 10})
-    ax4.set_ylabel('# TO', fontdict={'fontsize': 10})
+    ax3.set_ylabel('Number of Vehicles', fontdict={'fontsize': 10})
+    ax4.set_ylabel('Number of TO', fontdict={'fontsize': 10})
 
     ax1.tick_params(axis='both', which='major', labelsize=8)
     ax2.tick_params(axis='both', which='major', labelsize=8)
@@ -118,10 +118,10 @@ def plot_summary(states_vh_df, states_to_df, queues_df, output_dir, replication_
     ax3.set_xlabel('Simulation Time (minutes)', fontdict={'fontsize': 8})
     ax4.set_xlabel('Simulation Time (minutes)', fontdict={'fontsize': 8})
 
-    ax1.set_ylabel('# Teleoperated vehicles', fontdict={'fontsize': 9})
+    ax1.set_ylabel('Number of Teleoperated vehicles', fontdict={'fontsize': 9})
     ax2.set_ylabel('TO Queue length', fontdict={'fontsize': 9})
-    ax3.set_ylabel('# Vehicles', fontdict={'fontsize': 9})
-    ax4.set_ylabel('# TO', fontdict={'fontsize': 9})
+    ax3.set_ylabel('Number of Vehicles', fontdict={'fontsize': 9})
+    ax4.set_ylabel('Number of TO', fontdict={'fontsize': 9})
 
     ax1.tick_params(axis='both', which='major', labelsize=7)
     ax2.tick_params(axis='both', which='major', labelsize=7)

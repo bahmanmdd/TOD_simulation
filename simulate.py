@@ -22,10 +22,10 @@ def parameters():
     region = [-math.inf, math.inf, -math.inf, math.inf]
 
     # lists of parameter options for batch runs
+    to2v_ratio_list = [0.20, 0.25]
     to2v_ratio_list = np.array(list(range(5, 105, 5))) / 100
-    to2v_ratio_list = [0.05, 0.10, 0.15, 0.20, 0.25, 0.30]
     takeover_time_list = [0, 1, 2, 5]
-    takeover_time_list = [0, 1, 2]
+    takeover_time_list = [0, 1, 2, 4, 5]
     carrier_proportion_list = [0.01, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]
     carrier_proportion_list = [0.005]
     max_to_duration = 4.5 * 60
@@ -37,13 +37,14 @@ def parameters():
 
 class Vehicle(object):
 
-    def __init__(self, vid, toid, stage, status, pattern, distribution, q_times):
+    def __init__(self, vid, toid, stage, status, pattern, distribution, q_times, q_begin):
         self.vid = vid
         self.toid = toid
         self.stage = stage
         self.status = status
         self.pattern = pattern
         self.q_times = q_times
+        self.q_begin = q_begin
         self.distribution = distribution
 
     def increment_stage(self):
@@ -81,7 +82,7 @@ def run_simulation(replication_no, output_dir, runs, n_vh, n_to, setup_to, act_s
     np.random.seed(seed=replication_no)
 
     # initialize variables, lists and objects
-    vh_dict = {'V{0}'.format(i + 1): Vehicle('V{0}'.format(i + 1), None, 0, act_seq[i][0], act_seq[i], act_dist[i], [])
+    vh_dict = {'V{0}'.format(i + 1): Vehicle('V{0}'.format(i + 1), None, 0, act_seq[i][0], act_seq[i], act_dist[i], [], None)
                for i in range(n_vh)}
     to_dict = {'TO{0}'.format(i + 1): Teleoperator('TO{0}'.format(i + 1), 'Idle', None)
                for i in range(n_to)}
@@ -153,7 +154,7 @@ def run_simulation(replication_no, output_dir, runs, n_vh, n_to, setup_to, act_s
             next_event, vehicle = event.process_idle(simulation_time, vehicle, current_event, names)
 
         elif current_event[names['Event']] == 'TO Queue':
-            next_event, vehicle, teleoperator, queues_to_list = event.process_queue(simulation_time, vehicle, to_dict, queues_to_list, names)
+            next_event, vehicle, teleoperator, queues_to_list = event.process_queue(simulation_time, vehicle, current_event, to_dict, queues_to_list, names)
 
         elif current_event[names['Event']] == 'Takeover':
             next_event, vehicle = event.process_takeover(simulation_time, vehicle, current_event, names, takeover_time)
@@ -163,7 +164,7 @@ def run_simulation(replication_no, output_dir, runs, n_vh, n_to, setup_to, act_s
                 simulation_time, current_event, names, vehicle, teleoperator, queues_to_list, vh_dict, rest_long, rest_short, max_to_duration)
 
         elif current_event[names['Event']] == 'Resting':
-            next_event, teleoperator, queues_to_list = event.process_resting(simulation_time, teleoperator, names, queues_to_list, vh_dict)
+            next_event, teleoperator, queues_to_list = event.process_resting(simulation_time, teleoperator, current_event, names, queues_to_list, vh_dict)
 
         elif current_event[names['Event']] == 'Signed off':
             pass
@@ -182,6 +183,7 @@ def run_simulation(replication_no, output_dir, runs, n_vh, n_to, setup_to, act_s
             states_to[status] = sum(to.status == status for to in to_dict.values())
         states_vh_df.loc[simulation_time] = states_vh
         states_to_df.loc[simulation_time] = states_to
+        queues_df.loc[simulation_time, qs_list[0]] = queues_to_list
         queues_df.loc[simulation_time, qs_list[1]] = len(queues_to_list)
 
         # check for termination conditions
@@ -199,11 +201,13 @@ def run_simulation(replication_no, output_dir, runs, n_vh, n_to, setup_to, act_s
                                setup_to)
 
     # event log to dataframe
-    event_log = pd.DataFrame(event_log.astype(str), columns=names.keys())
+    event_log[:, :4] = event_log[:, :4].astype(float)
+    event_log = pd.DataFrame(event_log, columns=names.keys())
 
     # sort event log
-    event_log = event_log.sort_values(by=['Begin'])
     event_log = event_log.drop('State', axis=1)
+    event_log = event_log[event_log['Duration'] > 0]
+    event_log = event_log.sort_values(by=['Begin', 'Duration'])
 
     # status summaries
     event_tmp = event_log[['Event', 'Duration']]
@@ -214,9 +218,8 @@ def run_simulation(replication_no, output_dir, runs, n_vh, n_to, setup_to, act_s
 
     # utilization rates
     event_log['Duration'] = pd.to_numeric(event_log['Duration'])
-    utilization_vh_avg = np.sum(event_log.query('Event=="Teleoperated"')['Duration']) / (n_mins * n_vh)
-    utilization_to_avg = np.sum(event_log[event_log['TO'].str.contains('TO', regex=False)]['Duration']) / (
-            n_mins * n_to)
+    utilization_vh_avg = np.sum(event_log[(event_log['Event']=='Teleoperated') | (event_log['Event']=='Takeover')]['Duration']) / (n_mins * n_vh)
+    utilization_to_avg = np.sum(event_log.query('Event!="Idle"')['Duration']) / (n_mins * n_to)
 
     # queues
     indices = states_vh_df.index.values
