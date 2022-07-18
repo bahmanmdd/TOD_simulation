@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
-plt.style.use('seaborn-paper')
+plt.style.use('seaborn-whitegrid')
 
 
 def plot_results(states_vh_df, states_to_df, queues_df, output_dir, replication_no, n_vh, n_to):

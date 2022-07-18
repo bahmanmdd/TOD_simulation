@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-plt.style.use('seaborn-paper')
+plt.style.use('seaborn-whitegrid')
 
 
 def stats_summary(utilizations, statuses, counts, queues, times, output_dir):
