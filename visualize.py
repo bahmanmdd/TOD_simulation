@@ -7,9 +7,8 @@ plt.style.use('seaborn')
 
 def plot_results(states_vh_df, states_to_df, queues_df, output_dir, replication_no, n_vh, n_to):
 
-    plt.close("all")
-
-    duration = states_vh_df.index[-1]
+    time_min = states_vh_df.index[0]
+    time_max = states_vh_df.index[-1]
 
     fig1 = plt.figure()
     fig2 = plt.figure()
@@ -21,20 +20,9 @@ def plot_results(states_vh_df, states_to_df, queues_df, output_dir, replication_
     ax3 = fig3.add_subplot(1, 1, 1)
     ax4 = fig4.add_subplot(1, 1, 1)
 
-    # ax1.set(xlim=[-0.5, duration])
-    # ax2.set(xlim=[-0.5, duration])
-    # ax3.set(xlim=[-0.5, duration])
-    # ax4.set(xlim=[-0.5, duration])
-
-    ax1.set(ylim=[-n_vh*0.01, n_vh + (n_vh*0.01)])
-    ax2.set(ylim=[-(n_vh - n_to)*0.01, n_vh - n_to + (n_vh - n_to)*0.01])
-    ax3.set(ylim=[-n_vh*0.01, n_vh + (n_vh*0.01)])
-    ax4.set(ylim=[-n_to*0.01, n_to + (n_to*0.01)])
-
-    # ax1.hlines(y=n_vh, colors='gray', linestyles='--', xmin=-0.5, xmax=duration, label='Fleet size')
-    ax1.hlines(y=n_vh, colors='gray', linestyles='--', label='Fleet size')
-    ax3.hlines(y=n_vh, colors='gray', linestyles='--', label='Fleet size')
-    ax4.hlines(y=n_to, colors='gray', linestyles='--', label='Available TO')
+    ax1.hlines(y=n_vh, colors='gray', linestyles='--', xmin=time_min, xmax=time_max, label='Fleet size')
+    ax3.hlines(y=n_vh, colors='gray', linestyles='--', xmin=time_min, xmax=time_max, label='Fleet size')
+    ax4.hlines(y=n_to, colors='gray', linestyles='--', xmin=time_min, xmax=time_max, label='Available TO')
 
     ax1.set_xlabel('Simulation Time (minutes)', fontdict={'fontsize': 10})
     ax2.set_xlabel('Simulation Time (minutes)', fontdict={'fontsize': 10})
@@ -63,13 +51,22 @@ def plot_results(states_vh_df, states_to_df, queues_df, output_dir, replication_
     for i in range(len(lines4)):
         lines4[i].set_label(states_to_df.columns[i])
 
+    ## vehicles
+    # TO queue
     lines3[0].set_color('m')
-    lines3[1].set_color('g')
+    # takeover
+    lines3[1].set_color('orange')
+    # moving (teleoperated)
     lines3[2].set_color('royalblue')
 
+    ## TOs
+    # idle
     lines4[0].set_color('green')
-    lines4[1].set_color('red')
-    lines4[2].set_color('blue')
+    # busy
+    lines4[1].set_color('royalblue')
+    # resting
+    lines4[2].set_color('red')
+    # takeover
     lines4[3].set_color('orange')
 
     ax1.legend()
@@ -92,7 +89,8 @@ def plot_results(states_vh_df, states_to_df, queues_df, output_dir, replication_
 
 def plot_summary(states_vh_df, states_to_df, queues_df, output_dir, replication_no, runs, n_vh, n_to, setup_to):
 
-    duration = states_vh_df.index[-1]
+    time_min = states_vh_df.index[0]
+    time_max = states_vh_df.index[-1]
 
     fig = plt.figure()
     fig.patch.set_facecolor('gold')
@@ -107,13 +105,8 @@ def plot_summary(states_vh_df, states_to_df, queues_df, output_dir, replication_
     ax3.set_facecolor('white')
     ax4.set_facecolor('darkslategray')
 
-    ax1.set(ylim=[-n_vh*0.05, n_vh + (n_vh*0.05)])
-    ax2.set(ylim=[-(n_vh - n_to)*0.05, n_vh - n_to + (n_vh - n_to)*0.05])
-    ax3.set(ylim=[-n_vh*0.05, n_vh + (n_vh*0.05)])
-    ax4.set(ylim=[-n_to*0.05, n_to + (n_to*0.05)])
-
-    ax1.hlines(y=n_vh, colors='gray', linestyles='--', label='Fleet size')
-    ax4.hlines(y=n_to, colors='whitesmoke', linestyles='--', label='Available TO')
+    ax1.hlines(y=n_vh, xmin=time_min, xmax=time_max, colors='gray', linestyles='--', label='Fleet size')
+    ax4.hlines(y=n_to, xmin=time_min, xmax=time_max, colors='whitesmoke', linestyles='--', label='Available TO')
 
     ax1.set_xlabel('Simulation Time (minutes)', fontdict={'fontsize': 8})
     ax2.set_xlabel('Simulation Time (minutes)', fontdict={'fontsize': 8})
@@ -149,14 +142,23 @@ def plot_summary(states_vh_df, states_to_df, queues_df, output_dir, replication_
     for i in range(len(lines4)):
         lines4[i].set_label(states_to_df.columns[i])
 
+    ## vehicles
+    # TO queue
     lines3[0].set_color('m')
-    lines3[1].set_color('g')
+    # takeover
+    lines3[1].set_color('orange')
+    # moving (teleoperated)
     lines3[2].set_color('royalblue')
 
-    lines4[3].set_color('orange')
-    lines4[2].set_color('blue')
-    lines4[1].set_color('red')
+    ## TOs
+    # idle
     lines4[0].set_color('green')
+    # busy
+    lines4[1].set_color('royalblue')
+    # resting
+    lines4[2].set_color('red')
+    # takeover
+    lines4[3].set_color('orange')
 
     ax1.legend(loc='upper right', bbox_to_anchor=(1.35, 1), fontsize='small')
     ax2.legend(loc='upper right', bbox_to_anchor=(1.35, 1), fontsize='small')

@@ -5,7 +5,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 plt.style.use('seaborn')
-sns.set_palette("bright")
+sns.set_palette("Dark")
 
 
 def stats_summary(utilizations, statuses, counts, queues, times, output_dir):

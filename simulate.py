@@ -17,17 +17,17 @@ import event
 def parameters():
 
     ## simulation scenario parameters
-    runs = 5
+    runs = 3
     tour_begins = [0, 5, 6, 8, 30]
-    tour_begins = [0, 5, 8]
+    tour_begins = [5]
     tour_lens = [9, 24, 48, 36]
     tour_lens = [9, 24]
 
     ## model variation parameters
     to2v_ratios = np.array(list(range(5, 105, 5))) / 100
-    to2v_ratios = [0.2, 0.4, 0.6, 0.8]
+    to2v_ratios = [1, 0.4, 0.2]
     takeover_times = [0, 1, 2, 5]
-    takeover_times = [1, 5]
+    takeover_times = [0, 1, 5]
     max_to_duration = 4.5 * 60
     rest_short = 10
     rest_long = 45
@@ -72,7 +72,7 @@ class Teleoperator(object):
 
 
 def run_simulation(replication_no, output_dir, runs, n_vh, n_to, setup_to, act_seq, act_dist, begin_times,
-                   max_to_duration, rest_short, rest_long):
+                   max_to_duration, rest_short, rest_long, tour_begin):
 
     ##################
     # initialization #
@@ -109,7 +109,7 @@ def run_simulation(replication_no, output_dir, runs, n_vh, n_to, setup_to, act_s
     queues_df = pd.DataFrame(columns=[st for st in qs_list])
 
     # clock & event list
-    simulation_time = 0.0
+    simulation_time = float(tour_begin)
     event_list = []
     names = {'Begin': 0, 'Duration': 1, 'End': 2, 'State': 3, 'Event': 4, 'Vehicle': 5, 'TO': 6}
 
@@ -262,7 +262,7 @@ def run_simulation(replication_no, output_dir, runs, n_vh, n_to, setup_to, act_s
         # plot final results and save graphs
         visualize.plot_results(states_vh_df, states_to_df, queues_df, output_dir, replication_no, n_vh, n_to)
 
-    return summary_utl, summary_sts, summary_cnt, summary_qus, states_vh_df.index[-1]
+    return summary_utl, summary_sts, summary_cnt, summary_qus, (states_vh_df.index[-1] - states_vh_df.index[0])
 
 
 if __name__ == "__main__":
@@ -312,7 +312,7 @@ if __name__ == "__main__":
                         print('Running replication {}'.format(r + 1))
                         utl, sts, cnt, qus, srt = run_simulation(r + 1, output_dir, runs, n_vh, n_to, takeover_time,
                                                                  act_seq, act_dist, begin_times, max_to_duration,
-                                                                 rest_short, rest_long)
+                                                                 rest_short, rest_long, tour_begin)
 
                         # record stats
                         if r == 0:
