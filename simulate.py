@@ -18,21 +18,21 @@ def parameters():
 
     ## simulation scenario parameters
     runs = 5
-    max_tour_len = math.inf
-    region = [-math.inf, math.inf, -math.inf, math.inf]
+    tour_begins = [0, 5, 6, 8, 30]
+    tour_begins = [0, 5, 8]
+    tour_lens = [9, 24, 48, 36]
+    tour_lens = [9, 24]
 
-    # lists of parameter options for batch runs
-    to2v_ratio_list = np.array(list(range(5, 105, 5))) / 100
-    to2v_ratio_list = [0.05, 0.10]
-    takeover_time_list = [0, 1, 2, 5]
-    takeover_time_list = [5, 0]
-    carrier_proportion_list = [0.01, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]
-    carrier_proportion_list = [0.005]
+    ## model variation parameters
+    to2v_ratios = np.array(list(range(5, 105, 5))) / 100
+    to2v_ratios = [0.2, 0.4, 0.6, 0.8]
+    takeover_times = [0, 1, 2, 5]
+    takeover_times = [1, 5]
     max_to_duration = 4.5 * 60
     rest_short = 10
     rest_long = 45
 
-    return runs, max_tour_len, region, to2v_ratio_list, takeover_time_list, carrier_proportion_list, max_to_duration, rest_short, rest_long
+    return runs, tour_lens, tour_begins, to2v_ratios, takeover_times, max_to_duration, rest_short, rest_long
 
 
 class Vehicle(object):
@@ -246,18 +246,18 @@ def run_simulation(replication_no, output_dir, runs, n_vh, n_to, setup_to, act_s
                                 'Max_Q_length': queues_to_leng_max}, index=[0])
 
     # save main stats
-    summary_utl.to_csv(output_dir + '/R_{0}'.format(replication_no) + '_summary_utilization.csv', index=False)
-    summary_sts.to_csv(output_dir + '/R_{0}'.format(replication_no) + '_summary_status.csv')
-    summary_cnt.to_csv(output_dir + '/R_{0}'.format(replication_no) + '_summary_counts.csv')
-    summary_qus.to_csv(output_dir + '/R_{0}'.format(replication_no) + '_summary_queues.csv')
+    summary_utl.to_csv(output_dir + '/R_{}'.format(replication_no) + '_summary_utilization.csv', index=False)
+    summary_sts.to_csv(output_dir + '/R_{}'.format(replication_no) + '_summary_status.csv')
+    summary_cnt.to_csv(output_dir + '/R_{}'.format(replication_no) + '_summary_counts.csv')
+    summary_qus.to_csv(output_dir + '/R_{}'.format(replication_no) + '_summary_queues.csv')
 
     # save detailed stats (only for the first replication)
     if replication_no == 1:
-        event_log.to_csv(output_dir + '/R_{0}'.format(replication_no) + '_events.csv', index_label='Simulation_time')
-        queues_df.to_csv(output_dir + '/R_{0}'.format(replication_no) + '_queues.csv', index_label='Simulation_time')
-        states_vh_df.to_csv(output_dir + '/R_{0}'.format(replication_no) + '_states_vh.csv',
+        event_log.to_csv(output_dir + '/R_{}'.format(replication_no) + '_events.csv', index_label='Simulation_time')
+        queues_df.to_csv(output_dir + '/R_{}'.format(replication_no) + '_queues.csv', index_label='Simulation_time')
+        states_vh_df.to_csv(output_dir + '/R_{}'.format(replication_no) + '_states_vh.csv',
                             index_label='Simulation_time')
-        states_to_df.to_csv(output_dir + '/R_{0}'.format(replication_no) + '_states_to.csv',
+        states_to_df.to_csv(output_dir + '/R_{}'.format(replication_no) + '_states_to.csv',
                             index_label='Simulation_time')
         # plot final results and save graphs
         visualize.plot_results(states_vh_df, states_to_df, queues_df, output_dir, replication_no, n_vh, n_to)
@@ -268,64 +268,75 @@ def run_simulation(replication_no, output_dir, runs, n_vh, n_to, setup_to, act_s
 if __name__ == "__main__":
 
     # parameters
-    runs, max_tour_len, region, to2v_ratio_list, takeover_time_list, carrier_proportion_list, max_to_duration, rest_short, rest_long = parameters()
+    runs, tour_lens, tour_begins, to2v_ratios, takeover_times, max_to_duration, rest_short, rest_long = parameters()
 
     # batch scenario runs
-    for carrier_proportion in carrier_proportion_list:
-        for to2v_ratio in to2v_ratio_list:
-            for takeover_time in takeover_time_list:
+    for tour_len in tour_lens:
+        for tour_begin in tour_begins:
 
-                # create output directory (if it does not exist already)
-                output_dir = 'Output/' + 'cp-{:.3f}'.format(carrier_proportion) + '_to2v-{:.2f}'.format(
-                    to2v_ratio) + '_su-{}'.format(takeover_time) + '_R-{}'.format(runs)
-                if not os.path.exists(output_dir):
-                    os.makedirs(output_dir)
+            # select relevant tours based on scenario parameters
+            preprocess.select_tours(tour_len, tour_begin)
 
-                # record simulation run time
-                Begin = datetime.now()
+            for to2v_ratio in to2v_ratios:
+                for takeover_time in takeover_times:
 
-                # replications
-                print('********************')
-                print('Scenario parameters:')
-                print('--------------------')
-                print('Proportion of carriers included: {}'.format(carrier_proportion))
-                print('Teleoperator to vehicle ratio: {}'.format(to2v_ratio))
-                print('Teleoperator takeover time: {}'.format(takeover_time))
-                print('Number of replications: {}'.format(runs))
-                print('Simulation in progress...')
-                for r in range(runs):
-                    # run data preprocessing and return simulation input
-                    print('Data preprocessing...')
-                    n_vh, act_seq, act_dist, begin_times = preprocess.simulation_input(carrier_proportion, max_tour_len, region, takeover_time)
-                    n_to = int(round(n_vh * to2v_ratio))
-                    # run simulation
-                    print('Running replication {0}'.format(r + 1))
-                    utl, sts, cnt, qus, srt = run_simulation(r + 1, output_dir, runs, n_vh, n_to, takeover_time,
-                                                             act_seq, act_dist, begin_times, max_to_duration, rest_short, rest_long)
+                    # create output directory (if it does not exist already)
+                    output_dir = 'Output/' + \
+                                 'tl-{}'.format(tour_len) + \
+                                 'tb-{}'.format(tour_begin) + \
+                                 '_to2v-{:.2f}'.format(to2v_ratio) + \
+                                 '_su-{}'.format(takeover_time) + \
+                                 '_R-{}'.format(runs)
+                    if not os.path.exists(output_dir):
+                        os.makedirs(output_dir)
 
-                    # record stats
-                    if r == 0:
-                        utilizations = utl
-                        statuses = sts.transpose().reset_index()
-                        counts = pd.DataFrame(cnt).transpose().reset_index()
-                        queues = pd.DataFrame(qus).transpose().reset_index()
-                        times = [srt]
-                    else:
-                        utilizations = utilizations.append(utl, ignore_index=True)
-                        statuses = statuses.append(sts.transpose().reset_index(), ignore_index=True)
-                        counts = counts.append(pd.DataFrame(cnt).transpose().reset_index(), ignore_index=True)
-                        queues = queues.append(pd.DataFrame(qus).transpose().reset_index(), ignore_index=True)
-                        times.append(srt)
+                    # record simulation run time
+                    Begin = datetime.now()
 
-                # report simulation run time
-                print('Simulation run time for {0} run(s): '.format(runs))
-                print(datetime.now() - Begin)
-                print('Replication run time (including data preprocessing): ')
-                print((datetime.now() - Begin) / runs)
-                print('***************************************************\n')
+                    # replications
+                    print('********************')
+                    print('Scenario parameters:')
+                    print('--------------------')
+                    print('Max tour length: {} hours'.format(tour_len))
+                    print('Tour begin time: {}:00'.format(tour_begin))
+                    print('Teleoperator to vehicle ratio: {}'.format(to2v_ratio))
+                    print('Teleoperator takeover time: {} minutes'.format(takeover_time))
+                    print('Number of replications: {}'.format(runs))
+                    print('Simulation in progress...')
+                    for r in range(runs):
+                        # run data preprocessing and return simulation input
+                        print('Data preprocessing...')
+                        n_vh, act_seq, act_dist, begin_times = preprocess.simulation_input(takeover_time)
+                        n_to = int(round(n_vh * to2v_ratio))
+                        # run simulation
+                        print('Running replication {}'.format(r + 1))
+                        utl, sts, cnt, qus, srt = run_simulation(r + 1, output_dir, runs, n_vh, n_to, takeover_time,
+                                                                 act_seq, act_dist, begin_times, max_to_duration,
+                                                                 rest_short, rest_long)
 
-                # save summary stats
-                report.stats_summary(utilizations, statuses, counts, queues, times, output_dir)
+                        # record stats
+                        if r == 0:
+                            utilizations = utl
+                            statuses = sts.transpose().reset_index()
+                            counts = pd.DataFrame(cnt).transpose().reset_index()
+                            queues = pd.DataFrame(qus).transpose().reset_index()
+                            times = [srt]
+                        else:
+                            utilizations = utilizations.append(utl, ignore_index=True)
+                            statuses = statuses.append(sts.transpose().reset_index(), ignore_index=True)
+                            counts = counts.append(pd.DataFrame(cnt).transpose().reset_index(), ignore_index=True)
+                            queues = queues.append(pd.DataFrame(qus).transpose().reset_index(), ignore_index=True)
+                            times.append(srt)
+
+                    # report simulation run time
+                    print('Simulation run time for {} run(s): '.format(runs))
+                    print(datetime.now() - Begin)
+                    print('Replication run time (including data preprocessing): ')
+                    print((datetime.now() - Begin) / runs)
+                    print('***************************************************\n')
+
+                    # save summary stats
+                    report.stats_summary(utilizations, statuses, counts, queues, times, output_dir)
 
     # create plots to show tradeoffs between queue times and TO2V ratios
-    report.tradeoff_plots(to2v_ratio_list, carrier_proportion_list, takeover_time_list, runs)
+    report.tradeoff_plots(runs, tour_lens, tour_begins, to2v_ratios, takeover_times)

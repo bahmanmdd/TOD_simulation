@@ -5,13 +5,26 @@ import numpy as np
 import scipy.stats
 
 
-def simulation_input(carrier_prop, max_tour_len, region, takeover_time):
+def select_tours(tour_len, tour_begin):
 
     # read data
     data = pd.read_csv('Input/Tours_REF.csv')
 
-    # fileter data based on maximum tour length
-    data = data[data['TRIP_ARRTIME'] < max_tour_len]
+    # filter based on tour begin and tour duration
+    data_filtered = data[(data['TOUR_DEPTIME'] >= tour_begin) & (data['TRIP_ARRTIME'] <= (tour_begin+tour_len))]
+
+    # save filtered tours
+    data_filtered.to_csv('Input/Tours_filtered.csv', index=False)
+
+
+def simulation_input(takeover_time):
+
+    # proportion of carriers to include
+    ## Todo: later include all or filter another way
+    proportion = 0.01
+
+    # read data
+    data = pd.read_csv('Input/Tours_filtered.csv')
 
     # fix id issues
     data['CARRIER_ID'] = data['CARRIER_ID'].astype(int)
@@ -20,16 +33,10 @@ def simulation_input(carrier_prop, max_tour_len, region, takeover_time):
 
     # filter based on the proportion of carriers to include in study
     carriers = data['CARRIER_ID'].unique()
-    data = data[data['CARRIER_ID'].isin(carriers[:int(len(carriers)*carrier_prop)])]
-    # filter based on region
-    data = data[(region[0] <= data['X_ORIG']) & (data['X_ORIG'] <= region[1])]
-    data = data[(region[0] <= data['X_DEST']) & (data['X_DEST'] <= region[1])]
-    data = data[(region[2] <= data['Y_DEST']) & (data['Y_DEST'] <= region[3])]
-    data = data[(region[2] <= data['Y_ORIG']) & (data['Y_ORIG'] <= region[3])]
+    data = data[data['CARRIER_ID'].isin(carriers[:int(len(carriers)*proportion)])]
 
     # sort data
     data = data.sort_values(by=['TOUR_DEPTIME', 'CARRIER_ID', 'TOUR_ID', 'TRIP_ID'])
-    data_np = data.values
 
     # calculate buffer values
     # buffer = np.zeros(len(data_np))
@@ -46,7 +53,7 @@ def simulation_input(carrier_prop, max_tour_len, region, takeover_time):
     input_data['trip_id'] = data['TRIP_ID']
     input_data['tour_departure'] = data['TOUR_DEPTIME'] * 60
     # input_data['buffer_duration'] = data['buffer'] * 60
-    rv = scipy.stats.expon(loc=19, scale=1)
+    rv = scipy.stats.expon(loc=15, scale=20)
     input_data['buffer_duration'] = rv.rvs(size=len(data['TRIP_ID']))
     input_data['moving_duration'] = (data['TRIP_ARRTIME'] - data['TRIP_DEPTIME']) * 60
 

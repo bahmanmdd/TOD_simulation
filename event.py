@@ -10,7 +10,7 @@ def create_first_events(simulation_time, event_list, vh_dict, begin_times, names
         first_activity = vehicle.get_current_activity(simulation_time)
         first_event = np.array([begin_times[vn],
                                 first_activity[1],
-                                begin_times[vn]+begin_times[vn],
+                                begin_times[vn]+first_activity[1],
                                 0,
                                 first_activity[3],
                                 vehicle.vid,

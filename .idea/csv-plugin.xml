@@ -10,6 +10,230 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="\Output\0 Archive\Last tests\cp-0.005_to2v-0.20_su-0_R-5\R_1_events.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\Output\0 Archive\Last tests\cp-0.005_to2v-0.20_su-0_R-5\R_1_states_vh.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\Output\0 Archive\Last tests\cp-0.005_to2v-0.20_su-0_R-5\R_1_summary_counts.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\Output\0 Archive\Last tests\cp-0.005_to2v-0.20_su-0_R-5\R_1_summary_status.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\Output\0 Archive\Last tests\cp-0.005_to2v-0.20_su-0_R-5\R_2_summary_counts.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\Output\0 Archive\Last tests\cp-0.005_to2v-0.20_su-0_R-5\R_2_summary_status.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\Output\0 Archive\Last tests\cp-0.005_to2v-0.20_su-0_R-5\R_3_summary_counts.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\Output\0 Archive\Last tests\cp-0.005_to2v-0.20_su-0_R-5\R_3_summary_status.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\Output\0 Archive\Last tests\cp-0.005_to2v-0.20_su-0_R-5\R_4_summary_counts.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\Output\0 Archive\Last tests\cp-0.005_to2v-0.20_su-0_R-5\R_4_summary_status.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\Output\0 Archive\Last tests\cp-0.005_to2v-0.20_su-0_R-5\R_5_summary_counts.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\Output\0 Archive\Last tests\cp-0.005_to2v-0.20_su-0_R-5\R_5_summary_status.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\Output\0 Archive\Last tests\cp-0.005_to2v-0.20_su-1_R-5\R_1_events.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\Output\0 Archive\Last tests\cp-0.005_to2v-0.20_su-1_R-5\R_1_states_vh.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\Output\0 Archive\Last tests\cp-0.005_to2v-0.20_su-1_R-5\R_1_summary_counts.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\Output\0 Archive\Last tests\cp-0.005_to2v-0.20_su-1_R-5\R_1_summary_status.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\Output\0 Archive\Last tests\cp-0.005_to2v-0.20_su-1_R-5\R_2_summary_counts.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\Output\0 Archive\Last tests\cp-0.005_to2v-0.20_su-1_R-5\R_2_summary_status.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\Output\0 Archive\Last tests\cp-0.005_to2v-0.20_su-1_R-5\R_3_summary_counts.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\Output\0 Archive\Last tests\cp-0.005_to2v-0.20_su-1_R-5\R_3_summary_status.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\Output\0 Archive\Last tests\cp-0.005_to2v-0.20_su-1_R-5\R_4_summary_counts.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\Output\0 Archive\Last tests\cp-0.005_to2v-0.20_su-1_R-5\R_4_summary_status.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\Output\0 Archive\Last tests\cp-0.005_to2v-0.20_su-1_R-5\R_5_summary_counts.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\Output\0 Archive\Last tests\cp-0.005_to2v-0.20_su-1_R-5\R_5_summary_status.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\Output\0 Archive\Last tests\cp-0.005_to2v-0.30_su-0_R-5\R_1_events.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\Output\0 Archive\Last tests\cp-0.005_to2v-0.30_su-0_R-5\R_1_states_vh.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\Output\0 Archive\Last tests\cp-0.005_to2v-0.30_su-0_R-5\R_1_summary_counts.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\Output\0 Archive\Last tests\cp-0.005_to2v-0.30_su-0_R-5\R_1_summary_status.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\Output\0 Archive\Last tests\cp-0.005_to2v-0.30_su-0_R-5\R_2_summary_counts.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\Output\0 Archive\Last tests\cp-0.005_to2v-0.30_su-0_R-5\R_2_summary_status.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\Output\0 Archive\Last tests\cp-0.005_to2v-0.30_su-0_R-5\R_3_summary_counts.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\Output\0 Archive\Last tests\cp-0.005_to2v-0.30_su-0_R-5\R_3_summary_status.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
       </map>
     </option>
   </component>
