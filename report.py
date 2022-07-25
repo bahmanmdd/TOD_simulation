@@ -5,7 +5,6 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 plt.style.use('seaborn')
-sns.set_palette("Dark")
 
 
 def stats_summary(utilizations, statuses, counts, queues, times, output_dir):
@@ -73,7 +72,9 @@ def tradeoff_plots(runs, tour_lens, tour_begins, to2v_ratios, takeover_times):
                     ci_data_new = pd.DataFrame(ci_temp)
                     ci_data = pd.concat([ci_data, ci_data_new], ignore_index=True)
 
-            sns.lineplot(data=ci_data, x="TO2vehicle ratio", y="Makespan", hue="TO takeover time", alpha=0.7)
+            # sns.set_palette("bright")
+            sns.lineplot(data=ci_data, x="TO2vehicle ratio", y="Makespan", hue="TO takeover time",
+                         palette=sns.color_palette("bright", n_colors=ci_data["TO takeover time"].nunique()))
             plt.title('Makespan vs Teleoperator-to-vehicle ratio')
             plt.xlabel('Teleoperator-to-vehicle ratio')
             plt.ylabel('Makespan (minutes)')
@@ -101,8 +102,9 @@ def tradeoff_plots(runs, tour_lens, tour_begins, to2v_ratios, takeover_times):
             scenarios[name_temp] = df[(df['tour_len'] == tour_len) & (df['tour_begin'] == tour_begin)]
             scenarios[name_temp].to_excel(output_dir + '/' + name_temp + '_ratios.xlsx', index=False)
 
-            # df_avg.plot()
-            sns.lineplot(data=scenarios[name_temp], x="TO2vehicle_ratio", y="AVG_queue_time", hue="TO_takeover_time", alpha=0.7)
+            # sns.set_palette("bright")
+            sns.lineplot(data=scenarios[name_temp], x="TO2vehicle_ratio", y="AVG_queue_time", hue="TO_takeover_time",
+                         palette=sns.color_palette("bright", n_colors=scenarios["TO_takeover_time"].nunique()))
             plt.xlabel('Teleoperator-to-vehicle ratio')
             plt.ylabel('Average queue duration (minutes)')
             # plt.xlim([0, 1])
@@ -110,7 +112,8 @@ def tradeoff_plots(runs, tour_lens, tour_begins, to2v_ratios, takeover_times):
             plt.close()
 
             # df_max.plot()
-            sns.lineplot(data=scenarios[name_temp], x="TO2vehicle_ratio", y="Max_queue_time", hue="TO_takeover_time", alpha=0.7)
+            sns.lineplot(data=scenarios[name_temp], x="TO2vehicle_ratio", y="Max_queue_time", hue="TO_takeover_time",
+                         palette=sns.color_palette("bright", n_colors=scenarios["TO_takeover_time"].nunique()))
             plt.xlabel('Teleoperator-to-vehicle ratio')
             plt.ylabel('Max queue duration (minutes)')
             # plt.xlim([0, 1])
@@ -118,7 +121,8 @@ def tradeoff_plots(runs, tour_lens, tour_begins, to2v_ratios, takeover_times):
             plt.close()
 
             # df_vav.plot()
-            sns.lineplot(data=scenarios[name_temp], x="TO2vehicle_ratio", y="AVG_queue_per_vehicle", hue="TO_takeover_time", alpha=0.7)
+            sns.lineplot(data=scenarios[name_temp], x="TO2vehicle_ratio", y="AVG_queue_per_vehicle", hue="TO_takeover_time",
+                         palette=sns.color_palette("bright", n_colors=scenarios["TO_takeover_time"].nunique()))
             plt.xlabel('Teleoperator-to-vehicle ratio')
             plt.ylabel('Average wait time per vehicle (minutes)')
             # plt.xlim([0, 1])

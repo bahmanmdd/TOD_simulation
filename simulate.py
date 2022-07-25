@@ -2,7 +2,6 @@
 main package for simulation of teleoperated driving in shipping processes
 """
 
-# import packages
 import math
 import pandas as pd
 import numpy as np
@@ -17,15 +16,15 @@ import event
 def parameters():
 
     ## simulation scenario parameters
-    runs = 3
+    runs = 5
     tour_begins = [0, 5, 6, 8, 30]
-    tour_begins = [5]
+    tour_begins = [0, 5]
     tour_lens = [9, 24, 48, 36]
     tour_lens = [9, 24]
 
     ## model variation parameters
     to2v_ratios = np.array(list(range(5, 105, 5))) / 100
-    to2v_ratios = [1, 0.4, 0.2]
+    to2v_ratios = [1, 0.8, 0.6, 0.4, 0.2]
     takeover_times = [0, 1, 2, 5]
     takeover_times = [0, 1, 5]
     max_to_duration = 4.5 * 60
@@ -297,11 +296,11 @@ if __name__ == "__main__":
                     print('********************')
                     print('Scenario parameters:')
                     print('--------------------')
-                    print('Max tour length: {} hours'.format(tour_len))
+                    print('Number of replications: {}'.format(runs))
                     print('Tour begin time: {}:00'.format(tour_begin))
+                    print('Max tour length: {} hours'.format(tour_len))
                     print('Teleoperator to vehicle ratio: {}'.format(to2v_ratio))
                     print('Teleoperator takeover time: {} minutes'.format(takeover_time))
-                    print('Number of replications: {}'.format(runs))
                     print('Simulation in progress...')
                     for r in range(runs):
                         # run data preprocessing and return simulation input
