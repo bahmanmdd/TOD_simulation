@@ -24,9 +24,9 @@ def parameters():
 
     ## model variation parameters
     to2v_ratios = np.array(list(range(5, 105, 5))) / 100
-    to2v_ratios = [1, 0.8, 0.6, 0.4, 0.2]
+    to2v_ratios = [1, 0.6, 0.2]
     takeover_times = [0, 1, 2, 5]
-    takeover_times = [0, 1, 5]
+    takeover_times = [0, 5]
     max_to_duration = 4.5 * 60
     rest_short = 10
     rest_long = 45
@@ -282,7 +282,7 @@ if __name__ == "__main__":
                     # create output directory (if it does not exist already)
                     output_dir = 'Output/' + \
                                  'tl-{}'.format(tour_len) + \
-                                 'tb-{}'.format(tour_begin) + \
+                                 '_tb-{}'.format(tour_begin) + \
                                  '_to2v-{:.2f}'.format(to2v_ratio) + \
                                  '_su-{}'.format(takeover_time) + \
                                  '_R-{}'.format(runs)
