@@ -29,18 +29,18 @@ def plot_results(states_vh_df, states_to_df, queues_df, output_dir, replication_
     ax3.set_xlabel('Simulation Time (minutes)', fontdict={'fontsize': 10})
     ax4.set_xlabel('Simulation Time (minutes)', fontdict={'fontsize': 10})
 
-    ax1.set_ylabel('Number of Teleoperated vehicles', fontdict={'fontsize': 10})
+    ax1.set_ylabel('Number of vehicles', fontdict={'fontsize': 10})
     ax2.set_ylabel('TO Queue length', fontdict={'fontsize': 10})
     ax3.set_ylabel('Number of Vehicles', fontdict={'fontsize': 10})
     ax4.set_ylabel('Number of TO', fontdict={'fontsize': 10})
 
-    ax1.tick_params(axis='both', which='major', labelsize=8)
-    ax2.tick_params(axis='both', which='major', labelsize=8)
-    ax3.tick_params(axis='both', which='major', labelsize=8)
-    ax4.tick_params(axis='both', which='major', labelsize=8)
+    ax1.tick_params(axis='both', which='both', labelsize=8)
+    ax2.tick_params(axis='both', which='both', labelsize=8)
+    ax3.tick_params(axis='both', which='both', labelsize=8)
+    ax4.tick_params(axis='both', which='both', labelsize=8)
 
     lines1 = ax1.plot(states_vh_df['Teleoperated'], 'royalblue')
-    lines2 = ax2.plot(queues_df.iloc[:, 1], 'm')
+    lines2 = ax2.plot(queues_df.iloc[:, 0], 'm')
     lines3 = ax3.plot(states_vh_df.iloc[:, 1:-1][::-1])
     lines4 = ax4.plot(states_to_df, alpha=0.7)
 
@@ -69,20 +69,20 @@ def plot_results(states_vh_df, states_to_df, queues_df, output_dir, replication_
     # takeover
     lines4[3].set_color('orange')
 
-    ax1.legend()
-    ax2.legend()
-    ax3.legend()
-    ax4.legend()
+    ax1.legend(loc='upper right', bbox_to_anchor=(1.15, 1), fontsize='small')
+    ax2.legend(loc='upper right', bbox_to_anchor=(1.15, 1), fontsize='small')
+    ax3.legend(loc='upper right', bbox_to_anchor=(1.15, 1), fontsize='small')
+    ax4.legend(loc='upper right', bbox_to_anchor=(1.15, 1), fontsize='small')
 
     fig1.set_size_inches(12, 6)
     fig2.set_size_inches(12, 6)
     fig3.set_size_inches(12, 6)
     fig4.set_size_inches(12, 6)
 
-    fig1.savefig(output_dir + '/R_{0}'.format(replication_no) + '_states_vh_m.jpeg', dpi=800)
-    fig2.savefig(output_dir + '/R_{0}'.format(replication_no) + '_queues.jpeg', dpi=800)
-    fig3.savefig(output_dir + '/R_{0}'.format(replication_no) + '_states_vh.jpeg', dpi=800)
-    fig4.savefig(output_dir + '/R_{0}'.format(replication_no) + '_states_to.jpeg', dpi=800)
+    fig1.savefig(output_dir + '/R_{0}'.format(replication_no) + '_states_vh_m.jpeg', bbox_inches="tight", dpi=800)
+    fig2.savefig(output_dir + '/R_{0}'.format(replication_no) + '_queues.jpeg', bbox_inches="tight", dpi=800)
+    fig3.savefig(output_dir + '/R_{0}'.format(replication_no) + '_states_vh.jpeg', bbox_inches="tight", dpi=800)
+    fig4.savefig(output_dir + '/R_{0}'.format(replication_no) + '_states_to.jpeg', bbox_inches="tight", dpi=800)
 
     plt.close("all")
 
@@ -131,7 +131,7 @@ def plot_summary(states_vh_df, states_to_df, queues_df, output_dir, replication_
     fig.tight_layout()
 
     lines1 = ax1.plot(states_vh_df['Teleoperated'], 'royalblue')
-    lines2 = ax2.plot(queues_df.iloc[:, 1], 'm')
+    lines2 = ax2.plot(queues_df.iloc[:, 0], 'm')
     lines3 = ax3.plot(states_vh_df.iloc[:, 1:-1])
     lines4 = ax4.plot(states_to_df)
 

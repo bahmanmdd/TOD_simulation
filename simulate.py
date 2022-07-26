@@ -16,7 +16,7 @@ import event
 def parameters():
 
     ## simulation scenario parameters
-    runs = 5
+    runs = 3
     tour_begins = [0, 5, 6, 8, 30]
     tour_begins = [0, 5]
     tour_lens = [9, 24, 48, 36]
@@ -24,9 +24,9 @@ def parameters():
 
     ## model variation parameters
     to2v_ratios = np.array(list(range(5, 105, 5))) / 100
-    to2v_ratios = [1, 0.6, 0.2]
+    to2v_ratios = [0.2, 0.4, 0.6, 0.8, 1]
     takeover_times = [0, 1, 2, 5]
-    takeover_times = [0, 5]
+    takeover_times = [0, 1, 5]
     max_to_duration = 4.5 * 60
     rest_short = 10
     rest_long = 45
@@ -86,7 +86,6 @@ def run_simulation(replication_no, output_dir, runs, n_vh, n_to, setup_to, act_s
     to_dict = {'TO{0}'.format(i + 1): Teleoperator('TO{0}'.format(i + 1), 'Idle', None)
                for i in range(n_to)}
 
-    qs_list = list(dict.fromkeys(['Vehicles_waiting', 'Queue_length']))
     st_list = list(dict.fromkeys([item for sublist in act_seq for item in sublist]))
     st_list_to = list(dict.fromkeys(['Idle', 'Busy', 'Resting', 'Takeover']))
 
@@ -105,7 +104,7 @@ def run_simulation(replication_no, output_dir, runs, n_vh, n_to, setup_to, act_s
     # full states & queue history (for statistics)
     states_vh_df = pd.DataFrame(columns=[st for st in st_list])
     states_to_df = pd.DataFrame(columns=[st for st in st_list_to])
-    queues_df = pd.DataFrame(columns=[st for st in qs_list])
+    queues_df = pd.DataFrame(columns=['Queue length'])
 
     # clock & event list
     simulation_time = float(tour_begin)
@@ -182,8 +181,7 @@ def run_simulation(replication_no, output_dir, runs, n_vh, n_to, setup_to, act_s
             states_to[status] = sum(to.status == status for to in to_dict.values())
         states_vh_df.loc[simulation_time] = states_vh
         states_to_df.loc[simulation_time] = states_to
-        queues_df.loc[simulation_time, qs_list[0]] = queues_to_list
-        queues_df.loc[simulation_time, qs_list[1]] = len(queues_to_list)
+        queues_df.loc[simulation_time, 'Queue length'] = len(queues_to_list)
 
         # check for termination conditions
         if all(v.status == 'Signed off' for v in vh_dict.values()):
@@ -252,7 +250,7 @@ def run_simulation(replication_no, output_dir, runs, n_vh, n_to, setup_to, act_s
 
     # save detailed stats (only for the first replication)
     if replication_no == 1:
-        event_log.to_csv(output_dir + '/R_{}'.format(replication_no) + '_events.csv', index_label='Simulation_time')
+        event_log.to_csv(output_dir + '/R_{}'.format(replication_no) + '_events.csv', index=False)
         queues_df.to_csv(output_dir + '/R_{}'.format(replication_no) + '_queues.csv', index_label='Simulation_time')
         states_vh_df.to_csv(output_dir + '/R_{}'.format(replication_no) + '_states_vh.csv',
                             index_label='Simulation_time')

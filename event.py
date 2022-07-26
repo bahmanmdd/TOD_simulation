@@ -92,6 +92,15 @@ def process_queue(simulation_time, vehicle, current_event, to_dict, queues_to_li
 
     # end state
     else:
+
+        # if there was a queue: remove vehicle from queue and record queue time
+        if queues_to_list:
+            # remove first vehicle from the queue
+            queues_to_list = queues_to_list[1:]
+            # calculate queue duration and add to records
+            vehicle.q_times.append(simulation_time - vehicle.q_begin)
+            vehicle.q_begin = []
+
         # find next activity for the vehicle (which should be TO takeover)
         next_activity = vehicle.get_next_activity(simulation_time)
 
@@ -221,11 +230,6 @@ def process_resting(simulation_time, teleoperator, current_event, names, queues_
 
             # find first vehicle in queue
             next_vehicle = vh_dict[queues_to_list[0]]
-            # remove it from the queue
-            queues_to_list = queues_to_list[1:]
-            # calculate queue duration
-            next_vehicle.q_times.append(simulation_time - next_vehicle.q_begin)
-            next_vehicle.q_begin = []
 
             # assign TO to vehicle
             teleoperator.status = 'Busy'
@@ -234,7 +238,7 @@ def process_resting(simulation_time, teleoperator, current_event, names, queues_
 
             # create next event to add to the event list
             next_event = np.array([simulation_time,
-                                   next_vehicle.q_times[-1],
+                                   simulation_time - next_vehicle.q_begin,
                                    simulation_time,
                                    1.0,
                                    'TO Queue',
@@ -253,6 +257,8 @@ def update_event_list(event_list, event_log, next_event, next_event_to, names):
     # eliminate done event & add next event to event list
     if next_event is not None and next_event[names['Event']] != 'Signed off':
         event_list[0] = next_event
+        if (next_event[names['Event']] == 'TO Queue') & (next_event[names['Duration']] != 0):
+            next_event[names['Begin']] = float(next_event[names['End']]) - float(next_event[names['Duration']])
         event_log = np.concatenate((event_log, [next_event]))
     else:
         event_list = event_list[1:]
