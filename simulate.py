@@ -16,7 +16,7 @@ import event
 def parameters():
 
     ## simulation scenario parameters
-    runs = 3
+    runs = 5
     tour_begins = [0, 5, 6, 8, 30]
     tour_begins = [0, 5]
     tour_lens = [9, 24, 48, 36]
@@ -24,7 +24,7 @@ def parameters():
 
     ## model variation parameters
     to2v_ratios = np.array(list(range(5, 105, 5))) / 100
-    to2v_ratios = [0.2, 0.4, 0.6, 0.8, 1]
+    to2v_ratios = [0.2, 0.4, 0.6, 0.8, 1.0]
     takeover_times = [0, 1, 2, 5]
     takeover_times = [0, 1, 5]
     max_to_duration = 4.5 * 60
@@ -71,7 +71,7 @@ class Teleoperator(object):
 
 
 def run_simulation(replication_no, output_dir, runs, n_vh, n_to, setup_to, act_seq, act_dist, begin_times,
-                   max_to_duration, rest_short, rest_long, tour_begin):
+                   max_to_duration, rest_short, rest_long, tour_begin, tour_len, to_total):
 
     ##################
     # initialization #
@@ -108,6 +108,7 @@ def run_simulation(replication_no, output_dir, runs, n_vh, n_to, setup_to, act_s
 
     # clock & event list
     simulation_time = float(tour_begin)
+    time_up = (tour_begin + tour_len) * 60
     event_list = []
     names = {'Begin': 0, 'Duration': 1, 'End': 2, 'State': 3, 'Event': 4, 'Vehicle': 5, 'TO': 6}
 
@@ -116,7 +117,7 @@ def run_simulation(replication_no, output_dir, runs, n_vh, n_to, setup_to, act_s
     #################
 
     # create first events and add to event list
-    event_list, vh_dict = event.create_first_events(simulation_time, event_list, vh_dict, begin_times, names)
+    event_list, vh_dict = event.create_first_events(simulation_time, event_list, vh_dict, begin_times, names, time_up)
     event_log = event_list
 
     ##############
@@ -164,6 +165,9 @@ def run_simulation(replication_no, output_dir, runs, n_vh, n_to, setup_to, act_s
         elif current_event[names['Event']] == 'Resting':
             next_event, teleoperator, queues_to_list = event.process_resting(simulation_time, teleoperator, current_event, names, queues_to_list, vh_dict)
 
+        elif current_event[names['Event']] == 'Time up':
+            next_event, tour_completion, distance_completion = event.time_up(vh_dict, to_total, time_up, event_log)
+
         elif current_event[names['Event']] == 'Signed off':
             pass
 
@@ -195,7 +199,7 @@ def run_simulation(replication_no, output_dir, runs, n_vh, n_to, setup_to, act_s
     # save summary plot
     if replication_no == 1:
         visualize.plot_summary(states_vh_df, states_to_df, queues_df, output_dir, replication_no, runs, n_vh, n_to,
-                               setup_to)
+                               time_up)
 
     # event log to dataframe
     event_log[:, :4] = event_log[:, :4].astype(float)
@@ -257,9 +261,10 @@ def run_simulation(replication_no, output_dir, runs, n_vh, n_to, setup_to, act_s
         states_to_df.to_csv(output_dir + '/R_{}'.format(replication_no) + '_states_to.csv',
                             index_label='Simulation_time')
         # plot final results and save graphs
-        visualize.plot_results(states_vh_df, states_to_df, queues_df, output_dir, replication_no, n_vh, n_to)
+        visualize.plot_results(states_vh_df, states_to_df, queues_df, output_dir, replication_no, n_vh, n_to, time_up)
 
-    return summary_utl, summary_sts, summary_cnt, summary_qus, (states_vh_df.index[-1] - states_vh_df.index[0])
+    return summary_utl, summary_sts, summary_cnt, summary_qus, (states_vh_df.index[-1] - states_vh_df.index[0]), \
+           tour_completion, distance_completion
 
 
 if __name__ == "__main__":
@@ -303,13 +308,14 @@ if __name__ == "__main__":
                     for r in range(runs):
                         # run data preprocessing and return simulation input
                         print('Data preprocessing...')
-                        n_vh, act_seq, act_dist, begin_times = preprocess.simulation_input(takeover_time)
+                        n_vh, act_seq, act_dist, begin_times, to_total = preprocess.simulation_input(r, takeover_time)
                         n_to = int(round(n_vh * to2v_ratio))
+
                         # run simulation
                         print('Running replication {}'.format(r + 1))
-                        utl, sts, cnt, qus, srt = run_simulation(r + 1, output_dir, runs, n_vh, n_to, takeover_time,
+                        utl, sts, cnt, qus, srt, cmpt, cmpd = run_simulation(r + 1, output_dir, runs, n_vh, n_to, takeover_time,
                                                                  act_seq, act_dist, begin_times, max_to_duration,
-                                                                 rest_short, rest_long, tour_begin)
+                                                                 rest_short, rest_long, tour_begin, tour_len, to_total)
 
                         # record stats
                         if r == 0:
@@ -318,12 +324,14 @@ if __name__ == "__main__":
                             counts = pd.DataFrame(cnt).transpose().reset_index()
                             queues = pd.DataFrame(qus).transpose().reset_index()
                             times = [srt]
+                            completion = np.array([cmpt, cmpd]) * 100
                         else:
                             utilizations = utilizations.append(utl, ignore_index=True)
                             statuses = statuses.append(sts.transpose().reset_index(), ignore_index=True)
                             counts = counts.append(pd.DataFrame(cnt).transpose().reset_index(), ignore_index=True)
                             queues = queues.append(pd.DataFrame(qus).transpose().reset_index(), ignore_index=True)
                             times.append(srt)
+                            completion = np.vstack([completion, np.array([cmpt, cmpd]) * 100])
 
                     # report simulation run time
                     print('Simulation run time for {} run(s): '.format(runs))
@@ -333,7 +341,7 @@ if __name__ == "__main__":
                     print('***************************************************\n')
 
                     # save summary stats
-                    report.stats_summary(utilizations, statuses, counts, queues, times, output_dir)
+                    report.stats_summary(utilizations, statuses, counts, queues, times, completion, output_dir)
 
     # create plots to show tradeoffs between queue times and TO2V ratios
     report.tradeoff_plots(runs, tour_lens, tour_begins, to2v_ratios, takeover_times)

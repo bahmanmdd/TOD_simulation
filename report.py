@@ -8,7 +8,7 @@ import seaborn as sns
 plt.style.use('seaborn')
 
 
-def stats_summary(utilizations, statuses, counts, queues, times, output_dir):
+def stats_summary(utilizations, statuses, counts, queues, times, completion, output_dir):
     utilizations.index = utilizations.index + 1
     summary_utilization = utilizations.describe()
     summary_status = statuses.groupby('level_1').mean()
@@ -18,6 +18,7 @@ def stats_summary(utilizations, statuses, counts, queues, times, output_dir):
     summary_queue = queues.describe()
     summary_times = pd.Series(times, name='Makespan').describe()
     makespan_dist = pd.Series(times, name='Makespan')
+    completion_dist = pd.DataFrame(completion, columns=['tour_completion', 'distance_completion'])
 
     summary_utilization.transpose().rename(columns={'count': 'replications'}, inplace=False).to_excel(
         output_dir + '/R_0_summary_utilization.xlsx')
@@ -27,6 +28,7 @@ def stats_summary(utilizations, statuses, counts, queues, times, output_dir):
     summary_queue.to_excel(output_dir + '/R_0_summary_queues.xlsx')
     summary_times.to_excel(output_dir + '/R_0_summary_makespan.xlsx')
     makespan_dist.to_csv(output_dir + '/R_0_dist_makespan.csv')
+    completion_dist.to_csv(output_dir + '/R_0_dist_completion.csv', index_label='Replication')
     utilizations.to_csv(output_dir + '/R_0_full_utilization.csv', index_label='Replication')
 
 
@@ -35,7 +37,7 @@ def tradeoff_plots(runs, tour_lens, tour_begins, to2v_ratios, takeover_times):
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
-    data = pd.DataFrame(columns={'tour_len',
+    data = pd.DataFrame(columns=['tour_len',
                                  'tour_begin',
                                  'Replication',
                                  'TO_takeover_time',
@@ -43,7 +45,9 @@ def tradeoff_plots(runs, tour_lens, tour_begins, to2v_ratios, takeover_times):
                                  'AVG_queue_time',
                                  'Max_queue_time',
                                  'AVG_queue_per_vehicle',
-                                 'Makespan'})
+                                 'Makespan',
+                                 'tour_completion',
+                                 'distance_completion'])
 
     for tour_len in tour_lens:
         for tour_begin in tour_begins:
@@ -58,6 +62,7 @@ def tradeoff_plots(runs, tour_lens, tour_begins, to2v_ratios, takeover_times):
 
                     msp_temp = pd.read_csv(name + '/R_0_dist_makespan.csv')
                     kpi_temp = pd.read_csv(name + '/R_0_full_utilization.csv')
+                    cmp_temp = pd.read_csv(name + '/R_0_dist_completion.csv')
 
                     row = {'tour_len': [tour_len] * runs, 'tour_begin': [tour_begin] * runs,
                            'Replication': np.array([*range(runs)]) + 1,
@@ -65,7 +70,9 @@ def tradeoff_plots(runs, tour_lens, tour_begins, to2v_ratios, takeover_times):
                            'AVG_queue_time': kpi_temp['AVG_Q_time_per_queue'].values,
                            'Max_queue_time': kpi_temp['MAX_Q_time_per_queue'].values,
                            'AVG_queue_per_vehicle': kpi_temp['AVG_Q_time_per_vehicle'].values,
-                           'Makespan': msp_temp['Makespan'].values}
+                           'Makespan': msp_temp['Makespan'].values,
+                           'tour_completion': cmp_temp['tour_completion'].values,
+                           'distance_completion': cmp_temp['distance_completion'].values}
 
                     data_new = pd.DataFrame(row)
                     data = pd.concat([data, data_new], ignore_index=True)
@@ -81,7 +88,7 @@ def tradeoff_plots(runs, tour_lens, tour_begins, to2v_ratios, takeover_times):
             plt.xlabel('Teleoperator-to-vehicle ratio')
             plt.ylabel('Average queue duration (minutes)')
             # plt.xlim([0, 1])
-            plt.savefig(output_dir + '/' + name_temp + '_avg_q_times.jpeg', dpi=800)
+            plt.savefig(output_dir + '/' + name_temp + '_avg_q_times.jpeg', dpi=600)
             plt.close()
 
             sns.lineplot(data=data_temp, x="TO2vehicle_ratio", y="Max_queue_time", hue="TO_takeover_time",
@@ -89,7 +96,7 @@ def tradeoff_plots(runs, tour_lens, tour_begins, to2v_ratios, takeover_times):
             plt.xlabel('Teleoperator-to-vehicle ratio')
             plt.ylabel('Max queue duration (minutes)')
             # plt.xlim([0, 1])
-            plt.savefig(output_dir + '/' + name_temp + '_max_q_times.jpeg', dpi=800)
+            plt.savefig(output_dir + '/' + name_temp + '_max_q_times.jpeg', dpi=600)
             plt.close()
 
             sns.lineplot(data=data_temp, x="TO2vehicle_ratio", y="AVG_queue_per_vehicle", hue="TO_takeover_time",
@@ -97,7 +104,7 @@ def tradeoff_plots(runs, tour_lens, tour_begins, to2v_ratios, takeover_times):
             plt.xlabel('Teleoperator-to-vehicle ratio')
             plt.ylabel('Average wait time per vehicle (minutes)')
             # plt.xlim([0, 1])
-            plt.savefig(output_dir + '/' + name_temp + '_avg_vq_times.jpeg', dpi=800)
+            plt.savefig(output_dir + '/' + name_temp + '_avg_vq_times.jpeg', dpi=600)
             plt.close()
 
             sns.lineplot(data=data_temp, x="TO2vehicle_ratio", y="Makespan", hue="TO_takeover_time",
@@ -106,7 +113,25 @@ def tradeoff_plots(runs, tour_lens, tour_begins, to2v_ratios, takeover_times):
             plt.xlabel('Teleoperator-to-vehicle ratio')
             plt.ylabel('Makespan (minutes)')
             # plt.xlim([0, 1])
-            plt.savefig(output_dir + '/' + name_temp + '_total-makespan.jpeg', dpi=800)
+            plt.savefig(output_dir + '/' + name_temp + '_total-makespan.jpeg', dpi=600)
+            plt.close()
+
+            sns.lineplot(data=data_temp, x="TO2vehicle_ratio", y="tour_completion", hue="TO_takeover_time",
+                         palette=sns.color_palette("bright", n_colors=data_temp["TO_takeover_time"].nunique()))
+            plt.title('tour completion percentage within the baseline makespan')
+            plt.xlabel('Teleoperator-to-vehicle ratio')
+            plt.ylabel('tour completion percentage')
+            # plt.xlim([0, 1])
+            plt.savefig(output_dir + '/' + name_temp + '_completion-tour.jpeg', dpi=600)
+            plt.close()
+
+            sns.lineplot(data=data_temp, x="TO2vehicle_ratio", y="distance_completion", hue="TO_takeover_time",
+                         palette=sns.color_palette("bright", n_colors=data_temp["TO_takeover_time"].nunique()))
+            plt.title('distance completion percentage within the baseline makespan')
+            plt.xlabel('Teleoperator-to-vehicle ratio')
+            plt.ylabel('distance completion percentage')
+            # plt.xlim([0, 1])
+            plt.savefig(output_dir + '/' + name_temp + '_completion-distance.jpeg', dpi=600)
             plt.close()
 
     data = data[['tour_len',
@@ -117,5 +142,8 @@ def tradeoff_plots(runs, tour_lens, tour_begins, to2v_ratios, takeover_times):
                  'AVG_queue_time',
                  'Max_queue_time',
                  'AVG_queue_per_vehicle',
-                 'Makespan']]
+                 'Makespan',
+                 'tour_completion',
+                 'distance_completion']]
+
     data.to_excel(output_dir + '/Full_ratios.xlsx', index=False)

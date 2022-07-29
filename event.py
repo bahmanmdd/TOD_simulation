@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 
 
-def create_first_events(simulation_time, event_list, vh_dict, begin_times, names):
+def create_first_events(simulation_time, event_list, vh_dict, begin_times, names, time_up):
 
     vn = 0
     for vehicle in vh_dict.values():
@@ -17,6 +17,9 @@ def create_first_events(simulation_time, event_list, vh_dict, begin_times, names
                                 vehicle.toid])
         event_list.append(first_event)
         vn = vn + 1
+
+    timeup_event = np.array([time_up, 0, time_up, 0, 'Time up', None, None])
+    event_list.append(timeup_event)
 
     # sort event list
     event_list = np.array(event_list)
@@ -270,8 +273,28 @@ def update_event_list(event_list, event_log, next_event, next_event_to, names):
         next_event_to = None
 
     # sort event list
-    event_list[:, :4] = event_list[:, :4].astype(float)
+    event_list[:, :4] = np.around(event_list[:, :4].astype(float), 4)
     event_list = event_list[event_list[:, names['Begin']].argsort(kind='mergesort')]
 
     return event_list, event_log, next_event, next_event_to
+
+
+def time_up(vh_dict, to_planed, time_up, event_log):
+
+    # save trip completion rate at this point in time
+
+    # tour completion percentage
+    tour_completion = sum(v.status == 'Signed off' for v in vh_dict.values())/len(vh_dict)
+
+    # completed vs planned teleoperation minutes
+    event_log[:, :4] = event_log[:, :4].astype(float)
+    to_events = event_log[(event_log[:, 4] == 'Teleoperated') & (event_log[:, 0] < time_up) & (event_log[:, 1] != 0)]
+    to_events_finished_sum = np.sum(to_events[to_events[:, 2] <= time_up, 1])
+    to_events_ongoing = to_events[to_events[:, 2] > time_up, 1:3]
+    to_events_ongoing_sum = np.sum(to_events_ongoing[:, 0] - (to_events_ongoing[:, 1] - time_up))
+
+    distance_completion = (to_events_finished_sum + to_events_ongoing_sum) / to_planed
+
+    return None, np.around(tour_completion, 4), np.around(distance_completion, 4)
+
 

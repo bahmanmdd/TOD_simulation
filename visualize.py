@@ -5,7 +5,7 @@ import seaborn as sns
 plt.style.use('seaborn')
 
 
-def plot_results(states_vh_df, states_to_df, queues_df, output_dir, replication_no, n_vh, n_to):
+def plot_results(states_vh_df, states_to_df, queues_df, output_dir, replication_no, n_vh, n_to, time_up):
 
     time_min = states_vh_df.index[0]
     time_max = states_vh_df.index[-1]
@@ -19,10 +19,6 @@ def plot_results(states_vh_df, states_to_df, queues_df, output_dir, replication_
     ax2 = fig2.add_subplot(1, 1, 1)
     ax3 = fig3.add_subplot(1, 1, 1)
     ax4 = fig4.add_subplot(1, 1, 1)
-
-    ax1.hlines(y=n_vh, colors='gray', linestyles='--', xmin=time_min, xmax=time_max, label='Fleet size')
-    ax3.hlines(y=n_vh, colors='gray', linestyles='--', xmin=time_min, xmax=time_max, label='Fleet size')
-    ax4.hlines(y=n_to, colors='gray', linestyles='--', xmin=time_min, xmax=time_max, label='Available TO')
 
     ax1.set_xlabel('Simulation Time (minutes)', fontdict={'fontsize': 10})
     ax2.set_xlabel('Simulation Time (minutes)', fontdict={'fontsize': 10})
@@ -69,25 +65,34 @@ def plot_results(states_vh_df, states_to_df, queues_df, output_dir, replication_
     # takeover
     lines4[3].set_color('orange')
 
-    ax1.legend(loc='upper right', bbox_to_anchor=(1.15, 1), fontsize='small')
-    ax2.legend(loc='upper right', bbox_to_anchor=(1.15, 1), fontsize='small')
-    ax3.legend(loc='upper right', bbox_to_anchor=(1.15, 1), fontsize='small')
-    ax4.legend(loc='upper right', bbox_to_anchor=(1.15, 1), fontsize='small')
+    ax1.hlines(y=n_vh, colors='gray', linestyles='--', xmin=time_min, xmax=time_max, label='Fleet size')
+    ax3.hlines(y=n_vh, colors='gray', linestyles='--', xmin=time_min, xmax=time_max, label='Fleet size')
+    ax4.hlines(y=n_to, colors='gray', linestyles='--', xmin=time_min, xmax=time_max, label='Available TO')
+
+    ax1.vlines(x=time_up, colors='black', linestyles='-', ymin=0, ymax=n_vh, label='Baseline makespan')
+    ax2.vlines(x=time_up, colors='black', linestyles='-', ymin=0, ymax=np.max(queues_df), label='Baseline makespan')
+    ax3.vlines(x=time_up, colors='black', linestyles='-', ymin=0, ymax=n_vh, label='Baseline makespan')
+    ax4.vlines(x=time_up, colors='black', linestyles='-', ymin=0, ymax=n_to, label='Baseline makespan')
+
+    ax1.legend(loc='upper right', bbox_to_anchor=(1.2, 1), fontsize='medium')
+    ax2.legend(loc='upper right', bbox_to_anchor=(1.2, 1), fontsize='medium')
+    ax3.legend(loc='upper right', bbox_to_anchor=(1.2, 1), fontsize='medium')
+    ax4.legend(loc='upper right', bbox_to_anchor=(1.2, 1), fontsize='medium')
 
     fig1.set_size_inches(12, 6)
     fig2.set_size_inches(12, 6)
     fig3.set_size_inches(12, 6)
     fig4.set_size_inches(12, 6)
 
-    fig1.savefig(output_dir + '/R_{0}'.format(replication_no) + '_states_vh_m.jpeg', bbox_inches="tight", dpi=800)
-    fig2.savefig(output_dir + '/R_{0}'.format(replication_no) + '_queues.jpeg', bbox_inches="tight", dpi=800)
-    fig3.savefig(output_dir + '/R_{0}'.format(replication_no) + '_states_vh.jpeg', bbox_inches="tight", dpi=800)
-    fig4.savefig(output_dir + '/R_{0}'.format(replication_no) + '_states_to.jpeg', bbox_inches="tight", dpi=800)
+    fig1.savefig(output_dir + '/R_{0}'.format(replication_no) + '_states_vh_m.jpeg', bbox_inches="tight", dpi=600)
+    fig2.savefig(output_dir + '/R_{0}'.format(replication_no) + '_queues.jpeg', bbox_inches="tight", dpi=600)
+    fig3.savefig(output_dir + '/R_{0}'.format(replication_no) + '_states_vh.jpeg', bbox_inches="tight", dpi=600)
+    fig4.savefig(output_dir + '/R_{0}'.format(replication_no) + '_states_to.jpeg', bbox_inches="tight", dpi=600)
 
     plt.close("all")
 
 
-def plot_summary(states_vh_df, states_to_df, queues_df, output_dir, replication_no, runs, n_vh, n_to, setup_to):
+def plot_summary(states_vh_df, states_to_df, queues_df, output_dir, replication_no, runs, n_vh, n_to, time_up):
 
     time_min = states_vh_df.index[0]
     time_max = states_vh_df.index[-1]
@@ -104,9 +109,6 @@ def plot_summary(states_vh_df, states_to_df, queues_df, output_dir, replication_
     ax2.set_facecolor('darkslategray')
     ax3.set_facecolor('white')
     ax4.set_facecolor('darkslategray')
-
-    ax1.hlines(y=n_vh, xmin=time_min, xmax=time_max, colors='gray', linestyles='--', label='Fleet size')
-    ax4.hlines(y=n_to, xmin=time_min, xmax=time_max, colors='whitesmoke', linestyles='--', label='Available TO')
 
     ax1.set_xlabel('Simulation Time (minutes)', fontdict={'fontsize': 8})
     ax2.set_xlabel('Simulation Time (minutes)', fontdict={'fontsize': 8})
@@ -160,6 +162,15 @@ def plot_summary(states_vh_df, states_to_df, queues_df, output_dir, replication_
     # takeover
     lines4[3].set_color('orange')
 
+    ax1.hlines(y=n_vh, colors='gray', linestyles='--', xmin=time_min, xmax=time_max, label='Fleet size')
+    ax3.hlines(y=n_vh, colors='gray', linestyles='--', xmin=time_min, xmax=time_max, label='Fleet size')
+    ax4.hlines(y=n_to, colors='gray', linestyles='--', xmin=time_min, xmax=time_max, label='Available TO')
+
+    ax1.vlines(x=time_up, colors='black', linestyles='-', ymin=0, ymax=n_vh, label='Baseline makespan')
+    ax2.vlines(x=time_up, colors='black', linestyles='-', ymin=0, ymax=np.max(queues_df), label='Baseline makespan')
+    ax3.vlines(x=time_up, colors='black', linestyles='-', ymin=0, ymax=n_vh, label='Baseline makespan')
+    ax4.vlines(x=time_up, colors='black', linestyles='-', ymin=0, ymax=n_to, label='Baseline makespan')
+
     ax1.legend(loc='upper right', bbox_to_anchor=(1.35, 1), fontsize='small')
     ax2.legend(loc='upper right', bbox_to_anchor=(1.35, 1), fontsize='small')
     ax3.legend(loc='upper right', bbox_to_anchor=(1.35, 1), fontsize='small')
@@ -168,6 +179,6 @@ def plot_summary(states_vh_df, states_to_df, queues_df, output_dir, replication_
     # tight layout and maximize window
     fig.set_size_inches(12, 6)
     fig.tight_layout()
-    fig.savefig(output_dir + '/R_{0}'.format(replication_no) + '_summary.jpeg', bbox_inches='tight', dpi=1000)
+    fig.savefig(output_dir + '/R_{0}'.format(replication_no) + '_summary.jpeg', bbox_inches='tight', dpi=600)
 
 
