@@ -89,8 +89,8 @@ def run_simulation(replication_no, output_dir, runs, n_vh, n_to, setup_to, act_s
     st_list = list(dict.fromkeys([item for sublist in act_seq for item in sublist]))
     st_list_to = list(dict.fromkeys(['Idle', 'Busy', 'Resting', 'Takeover']))
 
-    tour_completion = 100.00
-    distance_completion = 100.00
+    tour_completion = 1
+    distance_completion = 1
 
 
     next_event = None
@@ -327,14 +327,14 @@ if __name__ == "__main__":
                             counts = pd.DataFrame(cnt).transpose().reset_index()
                             queues = pd.DataFrame(qus).transpose().reset_index()
                             times = [srt]
-                            completion = np.array([cmpt, cmpd]) * 100
+                            completion = np.array([cmpt, cmpd])
                         else:
                             utilizations = utilizations.append(utl, ignore_index=True)
                             statuses = statuses.append(sts.transpose().reset_index(), ignore_index=True)
                             counts = counts.append(pd.DataFrame(cnt).transpose().reset_index(), ignore_index=True)
                             queues = queues.append(pd.DataFrame(qus).transpose().reset_index(), ignore_index=True)
                             times.append(srt)
-                            completion = np.vstack([completion, np.array([cmpt, cmpd]) * 100])
+                            completion = np.vstack([completion, np.array([cmpt, cmpd])])
 
                     # report simulation run time
                     print('Simulation run time for {} run(s): '.format(runs))
