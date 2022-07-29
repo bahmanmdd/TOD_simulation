@@ -89,6 +89,10 @@ def run_simulation(replication_no, output_dir, runs, n_vh, n_to, setup_to, act_s
     st_list = list(dict.fromkeys([item for sublist in act_seq for item in sublist]))
     st_list_to = list(dict.fromkeys(['Idle', 'Busy', 'Resting', 'Takeover']))
 
+    tour_completion = 100.00
+    distance_completion = 100.00
+
+
     next_event = None
     next_event_to = None
 
@@ -263,8 +267,7 @@ def run_simulation(replication_no, output_dir, runs, n_vh, n_to, setup_to, act_s
         # plot final results and save graphs
         visualize.plot_results(states_vh_df, states_to_df, queues_df, output_dir, replication_no, n_vh, n_to, time_up)
 
-    return summary_utl, summary_sts, summary_cnt, summary_qus, (states_vh_df.index[-1] - states_vh_df.index[0]), \
-           tour_completion, distance_completion
+    return summary_utl, summary_sts, summary_cnt, summary_qus, (states_vh_df.index[-1] - states_vh_df.index[0]), tour_completion, distance_completion
 
 
 if __name__ == "__main__":
