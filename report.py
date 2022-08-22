@@ -118,18 +118,18 @@ def tradeoff_plots(runs, tour_lens, tour_begins, to2v_ratios, takeover_times):
 
             sns.lineplot(data=data_temp, x="TO2vehicle_ratio", y="tour_completion", hue="TO_takeover_time",
                          palette=sns.color_palette("bright", n_colors=data_temp["TO_takeover_time"].nunique()))
-            plt.title('tour completion rate within the baseline makespan')
+            plt.title('Tour completion rate within the baseline makespan')
             plt.xlabel('Teleoperator-to-vehicle ratio')
-            plt.ylabel('tour completion rate')
+            plt.ylabel('Tour completion rate')
             # plt.xlim([0, 1])
             plt.savefig(output_dir + '/' + name_temp + '_completion-tour.jpeg', dpi=600)
             plt.close()
 
             sns.lineplot(data=data_temp, x="TO2vehicle_ratio", y="distance_completion", hue="TO_takeover_time",
                          palette=sns.color_palette("bright", n_colors=data_temp["TO_takeover_time"].nunique()))
-            plt.title('distance completion rate within the baseline makespan')
+            plt.title('Distance completion rate within the baseline makespan')
             plt.xlabel('Teleoperator-to-vehicle ratio')
-            plt.ylabel('distance completion rate')
+            plt.ylabel('Distance completion rate')
             # plt.xlim([0, 1])
             plt.savefig(output_dir + '/' + name_temp + '_completion-distance.jpeg', dpi=600)
             plt.close()

@@ -301,7 +301,7 @@ if __name__ == "__main__":
                     # replications
                     print('********************')
                     print('Scenario parameters:')
-                    print('--------------------')
+                    print('********************')
                     print('Number of replications: {}'.format(runs))
                     print('Tour begin time: {}:00'.format(tour_begin))
                     print('Max tour length: {} hours'.format(tour_len))
@@ -341,10 +341,13 @@ if __name__ == "__main__":
                     print(datetime.now() - Begin)
                     print('Replication run time (including data preprocessing): ')
                     print((datetime.now() - Begin) / runs)
-                    print('***************************************************\n')
+                    print('---------------------------------------------------')
+                    print('---------------------------------------------------\n')
 
                     # save summary stats
                     report.stats_summary(utilizations, statuses, counts, queues, times, completion, output_dir)
 
     # create plots to show tradeoffs between queue times and TO2V ratios
+    print('Just making some final plots...')
     report.tradeoff_plots(runs, tour_lens, tour_begins, to2v_ratios, takeover_times)
+    print('Done!')
