@@ -25,8 +25,8 @@ def parameters():
     ## model variation parameters
     to2v_ratios = np.array(list(range(5, 105, 5))) / 100
     to2v_ratios = [0.2, 0.4, 0.6, 0.8, 1.0]
-    takeover_times = [0, 1, 2, 5]
-    takeover_times = [0, 1, 5]
+    takeover_times = [0, 1, 2, 3]
+    takeover_times = [0, 1, 2]
     max_to_duration = 4.5 * 60
     rest_short = 10
     rest_long = 45
@@ -241,7 +241,7 @@ def run_simulation(replication_no, output_dir, runs, n_vh, n_to, setup_to, act_s
     summary_qus = pd.Series(wait_times, name='Q Duration').describe()
     summary_qus = summary_qus.fillna(0)
 
-    # utilization+ summary
+    # utilization + summary
     summary_utl = pd.DataFrame({'AVG_vehicle_utilization': np.round(utilization_vh_avg, 2),
                                 'AVG_TO_utilization': np.round(utilization_to_avg, 2),
                                 'AVG_Q_time_per_vehicle': np.round(queues_vh_time_avg, 2),
@@ -316,9 +316,10 @@ if __name__ == "__main__":
 
                         # run simulation
                         print('Running replication {}'.format(r + 1))
-                        utl, sts, cnt, qus, srt, cmpt, cmpd = run_simulation(r + 1, output_dir, runs, n_vh, n_to, takeover_time,
-                                                                 act_seq, act_dist, begin_times, max_to_duration,
-                                                                 rest_short, rest_long, tour_begin, tour_len, to_total)
+                        utl, sts, cnt, qus, srt, cmpt, cmpd = run_simulation(r + 1, output_dir, runs, n_vh, n_to,
+                                                                             takeover_time, act_seq, act_dist,
+                                                                             begin_times, max_to_duration, rest_short,
+                                                                             rest_long, tour_begin, tour_len, to_total)
 
                         # record stats
                         if r == 0:
@@ -347,7 +348,7 @@ if __name__ == "__main__":
                     # save summary stats
                     report.stats_summary(utilizations, statuses, counts, queues, times, completion, output_dir)
 
-    # create plots to show tradeoffs between queue times and TO2V ratios
+    # create plots to show tradeoffs between queue times and TO2V ratios (across scenarios)
     print('Just making some final plots...')
     report.tradeoff_plots(runs, tour_lens, tour_begins, to2v_ratios, takeover_times)
     print('Done!')
