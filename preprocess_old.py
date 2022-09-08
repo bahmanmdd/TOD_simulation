@@ -1,5 +1,4 @@
 import math
-import os
 from itertools import chain
 import pandas as pd
 import numpy as np
@@ -7,7 +6,7 @@ import scipy.stats
 pd.options.mode.chained_assignment = None
 
 
-def select_tours(tour_len, tour_begin, runs, proportion):
+def select_tours(tour_len, tour_begin):
 
     # read data
     data_full = pd.read_csv('Input/Tours_REF.csv')
@@ -15,52 +14,60 @@ def select_tours(tour_len, tour_begin, runs, proportion):
     # filter based on tour begin and tour duration
     data = data_full[(data_full['TOUR_DEPTIME'] >= tour_begin) & (data_full['TRIP_ARRTIME'] <= (tour_begin+tour_len))]
 
+    # proportion of carriers to include
+    ## Todo: later include all or filter another way
+    proportion = 0.01
+
     # fix id issues
-    data[['CARRIER_ID', 'TOUR_ID', 'TRIP_ID']] = data[['CARRIER_ID', 'TOUR_ID', 'TRIP_ID']].astype(int)
-    data['TOUR_ID'] = data[['CARRIER_ID', 'TOUR_ID']].apply(tuple, axis=1)
+    data.loc[:, 'CARRIER_ID'] = data['CARRIER_ID'].astype(int)
+    data.loc[:, 'TOUR_ID'] = data['TOUR_ID'].apply(lambda x: (int(x.split('_')[-2]), int(x.split('_')[-1])))
+    data.loc[:, 'TRIP_ID'] = data['TRIP_ID'].apply(lambda x: int(x.split('_')[-1]))
+
+    # filter based on the proportion of carriers to include in study
+    carriers = data['CARRIER_ID'].unique()
+    # Todo: random selection & tour selection instead of carrier selection
+    data = data[data['CARRIER_ID'].isin(carriers[:int(len(carriers) * proportion)])]
 
     # sort data
     data = data.sort_values(by=['TOUR_DEPTIME', 'CARRIER_ID', 'TOUR_ID', 'TRIP_ID'])
-    tours = data['TOUR_ID'].unique()
+    data_np = data.values
 
-    for r in range(runs):
+    # new df with only values we need
+    input_data = pd.DataFrame()
+    input_data['vehicle_id'] = data['TOUR_ID']
+    input_data['trip_id'] = data['TRIP_ID']
+    input_data['tour_departure'] = data['TOUR_DEPTIME'] * 60
+    input_data['moving_duration'] = (data['TRIP_ARRTIME'] - data['TRIP_DEPTIME']) * 60
 
-        # rng seed
-        np.random.seed(seed=r)
+    # buffer exponential values
+    # rv = scipy.stats.expon(loc=15, scale=20)
+    # input_data['buffer_duration'] = rv.rvs(size=len(data['TRIP_ID']))
 
-        # filter based on the proportion of carriers to include in study
-        tours_sample = sorted(np.random.choice(tours, int(len(tours) * proportion), replace=False))
-        data_sample = data[data['TOUR_ID'].isin(tours_sample)]
+    # calculate buffer values (extract MassGT generated values)
+    buffer = np.zeros(len(data_np))
+    for i in range(len(data_np)):
+        if data_np[i, 2] == 0:
+            buffer[i] = data_np[i, 16] - data_np[i, 15]
+        else:
+            buffer[i] = data_np[i, 16] - data_np[i - 1, 17]
+    data['buffer'] = buffer
 
-        # new df with only values we need
-        input_data = pd.DataFrame()
-        input_data['vehicle_id'] = data_sample['TOUR_ID']
-        input_data['trip_id'] = data_sample['TRIP_ID']
-        input_data['tour_departure'] = data_sample['TOUR_DEPTIME'] * 60
-        input_data['moving_duration'] = (data_sample['TRIP_ARRTIME'] - data['TRIP_DEPTIME']) * 60
+    # buffer from MassGT generated values
+    input_data['buffer_duration'] = data['buffer'] * 60
 
-        # calculate buffer values (extract MassGT generated values)
-        data_np = data_sample.values
-        buffer = np.zeros(len(data_np))
-        for i in range(len(data_np)):
-            if data_np[i, 2] == 0:
-                buffer[i] = data_np[i, 16] - data_np[i, 15]
-            else:
-                buffer[i] = data_np[i, 16] - data_np[i - 1, 17]
-        data_sample['buffer'] = buffer
-
-        # buffer from MassGT generated values
-        input_data['buffer_duration'] = data_sample['buffer'] * 60
-
-        # # save filtered tours
-        input_data.to_csv('Input/Tours_filtered_S' + str(r) + '.csv', index=False)
+    # # save filtered tours
+    input_data.to_csv('Input/Tours_filtered.csv', index=False)
 
 
 def simulation_input(run_number, takeover_time):
 
     # read data
-    input_data = pd.read_csv('Input/Tours_filtered_S' + str(run_number) + '.csv')
+    input_data = pd.read_csv('Input/Tours_filtered.csv')
 
+    if run_number != 0:
+        input_data['buffer_duration'] = input_data['buffer_duration'] + 5 * np.random.uniform(-1, 1, len(input_data))
+
+    input_data.loc[input_data['buffer_duration'] < 0, 'buffer_duration'] = 2
     input_data['moving_duration'] = np.around(input_data['moving_duration'], 4)
     input_data['buffer_duration'] = np.around(input_data['buffer_duration'], 4)
 

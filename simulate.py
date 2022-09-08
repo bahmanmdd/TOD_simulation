@@ -17,21 +17,20 @@ def parameters():
 
     ## simulation scenario parameters
     runs = 5
-    tour_begins = [0, 5, 6, 8, 30]
-    tour_begins = [0, 5]
-    tour_lens = [9, 24, 48, 36]
+    proportion = 0.01
+    tour_begins = [0, 5, 8]
     tour_lens = [9, 24]
 
     ## model variation parameters
+    to2v_ratios = [0.2, 0.8]
     to2v_ratios = np.array(list(range(5, 105, 5))) / 100
-    to2v_ratios = [0.2, 0.4, 0.6, 0.8, 1.0]
     takeover_times = [0, 1, 2, 3]
-    takeover_times = [0, 1, 2]
+    takeover_times = [0, 1, 2, 3]
     max_to_duration = 4.5 * 60
     rest_short = 10
     rest_long = 45
 
-    return runs, tour_lens, tour_begins, to2v_ratios, takeover_times, max_to_duration, rest_short, rest_long
+    return runs, proportion, tour_lens, tour_begins, to2v_ratios, takeover_times, max_to_duration, rest_short, rest_long
 
 
 class Vehicle(object):
@@ -273,14 +272,14 @@ def run_simulation(replication_no, output_dir, runs, n_vh, n_to, setup_to, act_s
 if __name__ == "__main__":
 
     # parameters
-    runs, tour_lens, tour_begins, to2v_ratios, takeover_times, max_to_duration, rest_short, rest_long = parameters()
+    runs, proportion, tour_lens, tour_begins, to2v_ratios, takeover_times, max_to_duration, rest_short, rest_long = parameters()
 
     # batch scenario runs
     for tour_len in tour_lens:
         for tour_begin in tour_begins:
 
             # select relevant tours based on scenario parameters
-            preprocess.select_tours(tour_len, tour_begin)
+            preprocess.select_tours(tour_len, tour_begin, runs, proportion)
 
             for to2v_ratio in to2v_ratios:
                 for takeover_time in takeover_times:
@@ -303,10 +302,12 @@ if __name__ == "__main__":
                     print('Scenario parameters:')
                     print('********************')
                     print('Number of replications: {}'.format(runs))
+                    print('Tour proportion: {}'.format(proportion))
                     print('Tour begin time: {}:00'.format(tour_begin))
                     print('Max tour length: {} hours'.format(tour_len))
                     print('Teleoperator to vehicle ratio: {}'.format(to2v_ratio))
-                    print('Teleoperator takeover time: {} minutes'.format(takeover_time))
+                    print('Teleoperator takeover time: {} minute(s)'.format(takeover_time))
+                    print('**************************')
                     print('Simulation in progress...')
                     for r in range(runs):
                         # run data preprocessing and return simulation input
@@ -351,4 +352,8 @@ if __name__ == "__main__":
     # create plots to show tradeoffs between queue times and TO2V ratios (across scenarios)
     print('Just making some final plots...')
     report.tradeoff_plots(runs, tour_lens, tour_begins, to2v_ratios, takeover_times)
+    # remove temp input files
+    for r in range(runs):
+        os.remove('Input/Tours_filtered_S' + str(r) + '.csv')
+
     print('Done!')

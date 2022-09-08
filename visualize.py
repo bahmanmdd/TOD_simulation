@@ -20,15 +20,15 @@ def plot_results(states_vh_df, states_to_df, queues_df, output_dir, replication_
     ax3 = fig3.add_subplot(1, 1, 1)
     ax4 = fig4.add_subplot(1, 1, 1)
 
-    ax1.set_xlabel('Simulation Time (minutes)', fontdict={'fontsize': 10})
-    ax2.set_xlabel('Simulation Time (minutes)', fontdict={'fontsize': 10})
-    ax3.set_xlabel('Simulation Time (minutes)', fontdict={'fontsize': 10})
-    ax4.set_xlabel('Simulation Time (minutes)', fontdict={'fontsize': 10})
+    ax1.set_xlabel('Simulation time (minutes)', fontdict={'fontsize': 10})
+    ax2.set_xlabel('Simulation time (minutes)', fontdict={'fontsize': 10})
+    ax3.set_xlabel('Simulation time (minutes)', fontdict={'fontsize': 10})
+    ax4.set_xlabel('Simulation time (minutes)', fontdict={'fontsize': 10})
 
     ax1.set_ylabel('Number of vehicles', fontdict={'fontsize': 10})
-    ax2.set_ylabel('TO Queue length', fontdict={'fontsize': 10})
-    ax3.set_ylabel('Number of Vehicles', fontdict={'fontsize': 10})
-    ax4.set_ylabel('Number of TO', fontdict={'fontsize': 10})
+    ax2.set_ylabel('TO queue length', fontdict={'fontsize': 10})
+    ax3.set_ylabel('Number of vehicles', fontdict={'fontsize': 10})
+    ax4.set_ylabel('Number of teleoperators', fontdict={'fontsize': 10})
 
     ax1.tick_params(axis='both', which='both', labelsize=8)
     ax2.tick_params(axis='both', which='both', labelsize=8)
@@ -67,7 +67,7 @@ def plot_results(states_vh_df, states_to_df, queues_df, output_dir, replication_
 
     ax1.hlines(y=n_vh, colors='gray', linestyles='--', xmin=time_min, xmax=time_max, label='Fleet size')
     ax3.hlines(y=n_vh, colors='gray', linestyles='--', xmin=time_min, xmax=time_max, label='Fleet size')
-    ax4.hlines(y=n_to, colors='gray', linestyles='--', xmin=time_min, xmax=time_max, label='Available TO')
+    ax4.hlines(y=n_to, colors='gray', linestyles='--', xmin=time_min, xmax=time_max, label='Available teleoperators')
 
     ax1.vlines(x=time_up, colors='black', linestyles='-', ymin=0, ymax=n_vh, label='Baseline makespan')
     ax2.vlines(x=time_up, colors='black', linestyles='-', ymin=0, ymax=np.max(queues_df), label='Baseline makespan')
@@ -110,15 +110,15 @@ def plot_summary(states_vh_df, states_to_df, queues_df, output_dir, replication_
     ax3.set_facecolor('white')
     ax4.set_facecolor('darkslategray')
 
-    ax1.set_xlabel('Simulation Time (minutes)', fontdict={'fontsize': 8})
-    ax2.set_xlabel('Simulation Time (minutes)', fontdict={'fontsize': 8})
-    ax3.set_xlabel('Simulation Time (minutes)', fontdict={'fontsize': 8})
-    ax4.set_xlabel('Simulation Time (minutes)', fontdict={'fontsize': 8})
+    ax1.set_xlabel('Simulation time (minutes)', fontdict={'fontsize': 7})
+    ax2.set_xlabel('Simulation time (minutes)', fontdict={'fontsize': 7})
+    ax3.set_xlabel('Simulation time (minutes)', fontdict={'fontsize': 7})
+    ax4.set_xlabel('Simulation time (minutes)', fontdict={'fontsize': 7})
 
-    ax1.set_ylabel('Number of Teleoperated vehicles', fontdict={'fontsize': 9})
-    ax2.set_ylabel('TO Queue length', fontdict={'fontsize': 9})
-    ax3.set_ylabel('Number of Vehicles', fontdict={'fontsize': 9})
-    ax4.set_ylabel('Number of TO', fontdict={'fontsize': 9})
+    ax1.set_ylabel('Number of teleoperated vehicles', fontdict={'fontsize': 7})
+    ax2.set_ylabel('Teleoperator queue length', fontdict={'fontsize': 7})
+    ax3.set_ylabel('Number of vehicles', fontdict={'fontsize': 7})
+    ax4.set_ylabel('Number of teleoperators', fontdict={'fontsize': 7})
 
     ax1.tick_params(axis='both', which='major', labelsize=7)
     ax2.tick_params(axis='both', which='major', labelsize=7)
@@ -130,7 +130,7 @@ def plot_summary(states_vh_df, states_to_df, queues_df, output_dir, replication_
     ax3.grid(False)
     ax4.grid(False)
 
-    fig.tight_layout()
+    # fig.tight_layout()
 
     lines1 = ax1.plot(states_vh_df['Teleoperated'], 'royalblue')
     lines2 = ax2.plot(queues_df.iloc[:, 0], 'm')
@@ -164,17 +164,17 @@ def plot_summary(states_vh_df, states_to_df, queues_df, output_dir, replication_
 
     ax1.hlines(y=n_vh, colors='gray', linestyles='--', xmin=time_min, xmax=time_max, label='Fleet size')
     ax3.hlines(y=n_vh, colors='gray', linestyles='--', xmin=time_min, xmax=time_max, label='Fleet size')
-    ax4.hlines(y=n_to, colors='gray', linestyles='--', xmin=time_min, xmax=time_max, label='Available TO')
+    ax4.hlines(y=n_to, colors='gray', linestyles='--', xmin=time_min, xmax=time_max, label='Available teleoperators')
 
     ax1.vlines(x=time_up, colors='black', linestyles='-', ymin=0, ymax=n_vh, label='Baseline makespan')
     ax2.vlines(x=time_up, colors='black', linestyles='-', ymin=0, ymax=np.max(queues_df), label='Baseline makespan')
     ax3.vlines(x=time_up, colors='black', linestyles='-', ymin=0, ymax=n_vh, label='Baseline makespan')
     ax4.vlines(x=time_up, colors='black', linestyles='-', ymin=0, ymax=n_to, label='Baseline makespan')
 
-    ax1.legend(loc='upper right', bbox_to_anchor=(1.35, 1), fontsize='small')
-    ax2.legend(loc='upper right', bbox_to_anchor=(1.35, 1), fontsize='small')
-    ax3.legend(loc='upper right', bbox_to_anchor=(1.35, 1), fontsize='small')
-    ax4.legend(loc='upper right', bbox_to_anchor=(1.35, 1), fontsize='small')
+    ax1.legend(loc='upper right', bbox_to_anchor=(1.4, 1), fontsize='small')
+    ax2.legend(loc='upper right', bbox_to_anchor=(1.4, 1), fontsize='small')
+    ax3.legend(loc='upper right', bbox_to_anchor=(1.4, 1), fontsize='small')
+    ax4.legend(loc='upper right', bbox_to_anchor=(1.4, 1), fontsize='small')
 
     # tight layout and maximize window
     fig.set_size_inches(12, 6)

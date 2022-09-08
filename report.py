@@ -9,6 +9,7 @@ plt.style.use('seaborn')
 
 
 def stats_summary(utilizations, statuses, counts, queues, times, completion, output_dir):
+
     utilizations.index = utilizations.index + 1
     summary_utilization = utilizations.describe()
     summary_status = statuses.groupby('level_1').mean()
@@ -33,6 +34,7 @@ def stats_summary(utilizations, statuses, counts, queues, times, completion, out
 
 
 def tradeoff_plots(runs, tour_lens, tour_begins, to2v_ratios, takeover_times):
+
     output_dir = 'Output/0 Ratios'
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
