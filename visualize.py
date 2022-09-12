@@ -67,7 +67,7 @@ def plot_results(states_vh_df, states_to_df, queues_df, output_dir, replication_
 
     ax1.hlines(y=n_vh, colors='gray', linestyles='--', xmin=time_min, xmax=time_max, label='Fleet size')
     ax3.hlines(y=n_vh, colors='gray', linestyles='--', xmin=time_min, xmax=time_max, label='Fleet size')
-    ax4.hlines(y=n_to, colors='gray', linestyles='--', xmin=time_min, xmax=time_max, label='Available teleoperators')
+    ax4.hlines(y=n_to, colors='gray', linestyles='--', xmin=time_min, xmax=time_max, label='Available TO')
 
     ax1.vlines(x=time_up, colors='black', linestyles='-', ymin=0, ymax=n_vh, label='Baseline makespan')
     ax2.vlines(x=time_up, colors='black', linestyles='-', ymin=0, ymax=np.max(queues_df), label='Baseline makespan')
@@ -164,7 +164,7 @@ def plot_summary(states_vh_df, states_to_df, queues_df, output_dir, replication_
 
     ax1.hlines(y=n_vh, colors='gray', linestyles='--', xmin=time_min, xmax=time_max, label='Fleet size')
     ax3.hlines(y=n_vh, colors='gray', linestyles='--', xmin=time_min, xmax=time_max, label='Fleet size')
-    ax4.hlines(y=n_to, colors='gray', linestyles='--', xmin=time_min, xmax=time_max, label='Available teleoperators')
+    ax4.hlines(y=n_to, colors='gray', linestyles='--', xmin=time_min, xmax=time_max, label='Available TO')
 
     ax1.vlines(x=time_up, colors='black', linestyles='-', ymin=0, ymax=n_vh, label='Baseline makespan')
     ax2.vlines(x=time_up, colors='black', linestyles='-', ymin=0, ymax=np.max(queues_df), label='Baseline makespan')
