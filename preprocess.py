@@ -9,7 +9,7 @@ pd.options.mode.chained_assignment = None
 
 def select_tours(tour_len, tour_begin, runs, proportion):
 
-    # read data
+    # read data (new data: Tours_REF, old data: Tours_old)
     data_full = pd.read_csv('Input/Tours_REF.csv')
 
     # filter based on tour begin and tour duration

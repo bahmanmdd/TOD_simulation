@@ -16,21 +16,19 @@ import event
 def parameters():
 
     ## simulation scenario parameters
-    runs = 5
-    proportion = 0.01
-    tour_begins = [0, 5, 8]
-    tour_lens = [9, 24]
+    replication = 5
+    sample_size = 0.01
+    simulation_start = [0]
+    simulation_duration = [9, 24]
 
     ## model variation parameters
-    to2v_ratios = [0.2, 0.8]
-    to2v_ratios = np.array(list(range(5, 105, 5))) / 100
-    takeover_times = [0, 1, 2, 3]
-    takeover_times = [0, 1, 2, 3]
+    to2v_ratios = np.array(list(range(20, 105, 5))) / 100
+    takeover_times = [0, 2, 5]
     max_to_duration = 4.5 * 60
     rest_short = 10
     rest_long = 45
 
-    return runs, proportion, tour_lens, tour_begins, to2v_ratios, takeover_times, max_to_duration, rest_short, rest_long
+    return replication, sample_size, simulation_duration, simulation_start, to2v_ratios, takeover_times, max_to_duration, rest_short, rest_long
 
 
 class Vehicle(object):
