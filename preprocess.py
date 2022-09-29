@@ -1,5 +1,6 @@
 import math
 import os
+import random
 from itertools import chain
 import pandas as pd
 import numpy as np
@@ -9,7 +10,7 @@ pd.options.mode.chained_assignment = None
 
 def select_tours(tour_len, tour_begin, runs, proportion):
 
-    # read data (new data: Tours_REF, old data: Tours_old)
+    # read data (new data: Tours_REF, old data: Tours_REF_old)
     data_full = pd.read_csv('Input/Tours_REF.csv')
 
     # filter based on tour begin and tour duration
@@ -36,7 +37,7 @@ def select_tours(tour_len, tour_begin, runs, proportion):
         input_data = pd.DataFrame()
         input_data['vehicle_id'] = data_sample['TOUR_ID']
         input_data['trip_id'] = data_sample['TRIP_ID']
-        input_data['tour_departure'] = data_sample['TOUR_DEPTIME'] * 60
+        input_data['tour_departure'] = (data_sample['TOUR_DEPTIME'] + np.random.uniform(0, 1, len(input_data))) * 60
         input_data['moving_duration'] = (data_sample['TRIP_ARRTIME'] - data['TRIP_DEPTIME']) * 60
 
         # calculate buffer values (extract MassGT generated values)

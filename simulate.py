@@ -17,13 +17,18 @@ def parameters():
 
     ## simulation scenario parameters
     replication = 5
+    replication = 2
     sample_size = 0.01
+    simulation_start = [0, 5, 8]
     simulation_start = [0]
     simulation_duration = [9, 24]
+    simulation_duration = [24]
 
     ## model variation parameters
     to2v_ratios = np.array(list(range(20, 105, 5))) / 100
+    to2v_ratios = [1]
     takeover_times = [0, 2, 5]
+    takeover_times = [0]
     max_to_duration = 4.5 * 60
     rest_short = 10
     rest_long = 45
