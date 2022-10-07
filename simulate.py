@@ -22,13 +22,13 @@ def parameters():
     simulation_start = [0, 5, 8]
     simulation_start = [0]
     simulation_duration = [9, 24]
-    simulation_duration = [24]
+    simulation_duration = [9]
 
     ## model variation parameters
     to2v_ratios = np.array(list(range(20, 105, 5))) / 100
-    to2v_ratios = [1]
+    to2v_ratios = [1, 0.4]
     takeover_times = [0, 2, 5]
-    takeover_times = [0]
+    takeover_times = [0, 2]
     max_to_duration = 4.5 * 60
     rest_short = 10
     rest_long = 45
@@ -236,10 +236,13 @@ def run_simulation(replication_no, output_dir, runs, n_vh, n_to, setup_to, act_s
     queues_vh_time_avg = queues_total_time / n_vh
     queues_to_leng_avg = queues_total_time / n_mins
     queues_to_leng_max = np.max(q_sizes)
+    move_times_avg = np.sum([v.distribution[i] for v in vh_dict.values() for i in range(v.stage+1) if v.pattern[i] == 'Teleoperated'])/n_vh
+    delay_ratio_avg = ((move_times_avg + queues_vh_time_avg + takeover_time)/move_times_avg) - 1
 
     wait_times_nested = [v.q_times for v in vh_dict.values() if v.q_times]
     wait_times = [item for sublist in wait_times_nested for item in sublist]
-    if not wait_times: wait_times = 0
+    if not wait_times:
+        wait_times = 0
     summary_qus = pd.Series(wait_times, name='Q Duration').describe()
     summary_qus = summary_qus.fillna(0)
 
@@ -250,7 +253,8 @@ def run_simulation(replication_no, output_dir, runs, n_vh, n_to, setup_to, act_s
                                 'AVG_Q_time_per_queue': np.round(np.mean(wait_times), 2),
                                 'MAX_Q_time_per_queue': np.round(np.max(wait_times), 2),
                                 'AVG_Q_length': np.round(queues_to_leng_avg, 2),
-                                'Max_Q_length': queues_to_leng_max}, index=[0])
+                                'Max_Q_length': queues_to_leng_max,
+                                'AVG_delay': delay_ratio_avg}, index=[0])
 
     # save main stats
     summary_utl.to_csv(output_dir + '/R_{}'.format(replication_no) + '_summary_utilization.csv', index=False)
@@ -269,7 +273,7 @@ def run_simulation(replication_no, output_dir, runs, n_vh, n_to, setup_to, act_s
         # plot final results and save graphs
         visualize.plot_results(states_vh_df, states_to_df, queues_df, output_dir, replication_no, n_vh, n_to, time_up)
 
-    return summary_utl, summary_sts, summary_cnt, summary_qus, (states_vh_df.index[-1] - states_vh_df.index[0]), tour_completion, distance_completion
+    return summary_utl, summary_sts, summary_cnt, summary_qus, (states_vh_df.index[-1] - states_vh_df.index[0]), tour_completion, distance_completion, delay_ratio_avg
 
 
 if __name__ == "__main__":
@@ -320,7 +324,7 @@ if __name__ == "__main__":
 
                         # run simulation
                         print('Running replication {}'.format(r + 1))
-                        utl, sts, cnt, qus, srt, cmpt, cmpd = run_simulation(r + 1, output_dir, runs, n_vh, n_to,
+                        utl, sts, cnt, qus, srt, cmpt, cmpd, cmpl = run_simulation(r + 1, output_dir, runs, n_vh, n_to,
                                                                              takeover_time, act_seq, act_dist,
                                                                              begin_times, max_to_duration, rest_short,
                                                                              rest_long, tour_begin, tour_len, to_total)
@@ -332,14 +336,14 @@ if __name__ == "__main__":
                             counts = pd.DataFrame(cnt).transpose().reset_index()
                             queues = pd.DataFrame(qus).transpose().reset_index()
                             times = [srt]
-                            completion = np.array([cmpt, cmpd])
+                            completion = np.array([cmpt, cmpd, cmpl])
                         else:
                             utilizations = utilizations.append(utl, ignore_index=True)
                             statuses = statuses.append(sts.transpose().reset_index(), ignore_index=True)
                             counts = counts.append(pd.DataFrame(cnt).transpose().reset_index(), ignore_index=True)
                             queues = queues.append(pd.DataFrame(qus).transpose().reset_index(), ignore_index=True)
                             times.append(srt)
-                            completion = np.vstack([completion, np.array([cmpt, cmpd])])
+                            completion = np.vstack([completion, np.array([cmpt, cmpd, cmpl])])
 
                     # report simulation run time
                     print('Simulation run time for {} run(s): '.format(runs))

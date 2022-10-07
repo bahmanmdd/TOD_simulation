@@ -19,7 +19,7 @@ def stats_summary(utilizations, statuses, counts, queues, times, completion, out
     summary_queue = queues.describe()
     summary_times = pd.Series(times, name='Makespan').describe()
     makespan_dist = pd.Series(times, name='Makespan')
-    completion_dist = pd.DataFrame(completion, columns=['tour_completion', 'distance_completion'])
+    completion_dist = pd.DataFrame(completion, columns=['tour_completion', 'distance_completion', 'delay'])
 
     summary_utilization.transpose().rename(columns={'count': 'replications'}, inplace=False).to_excel(
         output_dir + '/R_0_summary_utilization.xlsx')
@@ -49,7 +49,8 @@ def tradeoff_plots(runs, tour_lens, tour_begins, to2v_ratios, takeover_times):
                                  'AVG_queue_per_vehicle',
                                  'Makespan',
                                  'tour_completion',
-                                 'distance_completion'])
+                                 'distance_completion',
+                                 'delay'])
 
     for tour_len in tour_lens:
         for tour_begin in tour_begins:
@@ -74,7 +75,8 @@ def tradeoff_plots(runs, tour_lens, tour_begins, to2v_ratios, takeover_times):
                            'AVG_queue_per_vehicle': kpi_temp['AVG_Q_time_per_vehicle'].values,
                            'Makespan': msp_temp['Makespan'].values,
                            'tour_completion': cmp_temp['tour_completion'].values,
-                           'distance_completion': cmp_temp['distance_completion'].values}
+                           'distance_completion': cmp_temp['distance_completion'].values,
+                           'delay': cmp_temp['delay'].values}
 
                     data_new = pd.DataFrame(row)
                     data = pd.concat([data, data_new], ignore_index=True)
@@ -111,10 +113,13 @@ def tradeoff_plots(runs, tour_lens, tour_begins, to2v_ratios, takeover_times):
 
             sns.lineplot(data=data_temp, x="TO2vehicle_ratio", y="Makespan", hue="TO_takeover_time",
                          palette=sns.color_palette("bright", n_colors=data_temp["TO_takeover_time"].nunique()))
+            # plt.hlines(y=(tour_begin+tour_len)*60, colors='black', linestyles='--', label='Baseline makespan',
+            #            xmin=np.min(data_temp['TO2vehicle_ratio']),
+            #            xmax=np.max(data_temp['TO2vehicle_ratio']))
             plt.title('Makespan vs Teleoperator-to-vehicle ratio')
             plt.xlabel('Teleoperator-to-vehicle ratio')
             plt.ylabel('Makespan (minutes)')
-            # plt.xlim([0, 1])
+            # plt.legend()
             plt.savefig(output_dir + '/' + name_temp + '_total-makespan.jpeg', dpi=600)
             plt.close()
 
@@ -123,7 +128,7 @@ def tradeoff_plots(runs, tour_lens, tour_begins, to2v_ratios, takeover_times):
             plt.title('Tour completion rate within the baseline makespan')
             plt.xlabel('Teleoperator-to-vehicle ratio')
             plt.ylabel('Tour completion rate')
-            # plt.xlim([0, 1])
+            plt.xlim([0, 1])
             plt.savefig(output_dir + '/' + name_temp + '_completion-tour.jpeg', dpi=600)
             plt.close()
 
@@ -132,8 +137,17 @@ def tradeoff_plots(runs, tour_lens, tour_begins, to2v_ratios, takeover_times):
             plt.title('Distance completion rate within the baseline makespan')
             plt.xlabel('Teleoperator-to-vehicle ratio')
             plt.ylabel('Distance completion rate')
-            # plt.xlim([0, 1])
+            plt.xlim([0, 1])
             plt.savefig(output_dir + '/' + name_temp + '_completion-distance.jpeg', dpi=600)
+            plt.close()
+
+            sns.lineplot(data=data_temp, x="TO2vehicle_ratio", y="delay", hue="TO_takeover_time",
+                         palette=sns.color_palette("bright", n_colors=data_temp["TO_takeover_time"].nunique()))
+            plt.title('Average trip delay compared to the baseline')
+            plt.xlabel('Teleoperator-to-vehicle ratio')
+            plt.ylabel('Average trip delay (ratio compared to the baseline)')
+            plt.xlim([0, 1])
+            plt.savefig(output_dir + '/' + name_temp + '_completion-delay.jpeg', dpi=600)
             plt.close()
 
     data = data[['tour_len',
@@ -146,6 +160,7 @@ def tradeoff_plots(runs, tour_lens, tour_begins, to2v_ratios, takeover_times):
                  'AVG_queue_per_vehicle',
                  'Makespan',
                  'tour_completion',
-                 'distance_completion']]
+                 'distance_completion',
+                 'delay']]
 
     data.to_excel(output_dir + '/Full_ratios.xlsx', index=False)
