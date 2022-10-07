@@ -125,7 +125,7 @@ def tradeoff_plots(runs, tour_lens, tour_begins, to2v_ratios, takeover_times):
             plt.title('Tour completion rate within the baseline makespan')
             plt.xlabel('Teleoperator-to-vehicle ratio')
             plt.ylabel('Tour completion rate')
-            plt.ylim([0, 1])
+            # plt.ylim([0, 1])
             plt.savefig(output_dir + '/' + name_temp + '_completion-tour.jpeg', dpi=600)
             plt.close()
 
@@ -134,7 +134,7 @@ def tradeoff_plots(runs, tour_lens, tour_begins, to2v_ratios, takeover_times):
             plt.title('Distance completion rate within the baseline makespan')
             plt.xlabel('Teleoperator-to-vehicle ratio')
             plt.ylabel('Distance completion rate')
-            plt.ylim([0, 1])
+            # plt.ylim([0, 1])
             plt.savefig(output_dir + '/' + name_temp + '_completion-distance.jpeg', dpi=600)
             plt.close()
 
@@ -143,7 +143,7 @@ def tradeoff_plots(runs, tour_lens, tour_begins, to2v_ratios, takeover_times):
             plt.title('Average trip delay compared to the baseline')
             plt.xlabel('Teleoperator-to-vehicle ratio')
             plt.ylabel('Average trip delay (ratio compared to the baseline)')
-            plt.ylim([0, 1])
+            # plt.ylim([0, 1])
             plt.savefig(output_dir + '/' + name_temp + '_completion-delay.jpeg', dpi=600)
             plt.close()
 
