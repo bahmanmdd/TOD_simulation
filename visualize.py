@@ -1,7 +1,10 @@
-import pandas as pd
+"""
+visualization of results of simulation of teleoperated driving in shipping processes
+created by: Bahman Madadi
+"""
+
 import numpy as np
 import matplotlib.pyplot as plt
-import seaborn as sns
 plt.style.use('seaborn')
 
 

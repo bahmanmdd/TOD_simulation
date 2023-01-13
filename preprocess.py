@@ -1,17 +1,27 @@
-import math
-import os
-import random
+"""
+preprocessing MassGT data for simulation of teleoperated driving in shipping processes
+created by: Bahman Madadi
+"""
+
 from itertools import chain
 import pandas as pd
 import numpy as np
-import scipy.stats
 pd.options.mode.chained_assignment = None
 
 
 def select_tours(tour_len, tour_begin, runs, proportion):
 
-    # read data (new data: Tours_REF, old data: Tours_REF_old)
+    # read data
     data_full = pd.read_csv('Input/Tours_REF.csv')
+
+    # shift all trips by a uniform random number between 0-1 hour (to avoid same start times)
+    tour_sizes = data_full.groupby('TOUR_ID', sort=False).size()
+    tour_delay = data_full.groupby('TOUR_ID', sort=False).apply(lambda x: np.random.uniform(0, 1))
+    # tour_delay = pd.Series(np.random.uniform(0, 1, len(tour_sizes)))
+    trip_delay = tour_delay.reindex(tour_delay.index.repeat(tour_sizes)).values
+    data_full['TOUR_DEPTIME'] = data_full['TOUR_DEPTIME'] + trip_delay
+    data_full['TRIP_DEPTIME'] = data_full['TRIP_DEPTIME'] + trip_delay
+    data_full['TRIP_ARRTIME'] = data_full['TRIP_ARRTIME'] + trip_delay
 
     # filter based on tour begin and tour duration
     data = data_full[(data_full['TOUR_DEPTIME'] >= tour_begin) & (data_full['TRIP_ARRTIME'] <= (tour_begin+tour_len))]
@@ -37,7 +47,7 @@ def select_tours(tour_len, tour_begin, runs, proportion):
         input_data = pd.DataFrame()
         input_data['vehicle_id'] = data_sample['TOUR_ID']
         input_data['trip_id'] = data_sample['TRIP_ID']
-        input_data['tour_departure'] = (data_sample['TOUR_DEPTIME'] + np.random.uniform(0, 1, len(input_data))) * 60
+        input_data['tour_departure'] = data_sample['TOUR_DEPTIME'] * 60
         input_data['moving_duration'] = (data_sample['TRIP_ARRTIME'] - data['TRIP_DEPTIME']) * 60
 
         # calculate buffer values (extract MassGT generated values)
@@ -88,10 +98,4 @@ def simulation_input(run_number, takeover_time):
 
     return n_vh, act_seq, act_dist, np.around(begin_times.values, 3), total_to_planned
 
-    # for testing and validation
-    # np.array_equal(temp2.index.values, input_data['vehicle_id'].unique())
-    # np.array_equal(begin_times.index.values, input_data['vehicle_id'].unique())
-    # len_dist = np.array([len(x) for x in act_dist])
-    # len_seq = np.array([len(x) for x in act_seq])
-    # np.array_equal(len_seq, len_dist)
-    # np.min(input_data['buffer_duration'])
+

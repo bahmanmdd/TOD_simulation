@@ -1,10 +1,13 @@
-import os
+"""
+cross-scenario and meta-analysis reports for simulation of teleoperated driving in shipping processes
+created by: Bahman Madadi
+"""
 
+import os
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-
 plt.style.use('seaborn')
 
 
