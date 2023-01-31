@@ -54,7 +54,7 @@ def select_tours(tour_len, tour_begin, runs, proportion):
         data_np = data_sample.values
         buffer = np.zeros(len(data_np))
         for i in range(len(data_np)):
-            if data_np[i, 2] == 0:
+            if np.mod(data_np[i, 2], 10) == 0:
                 buffer[i] = data_np[i, 16] - data_np[i, 15]
             else:
                 buffer[i] = data_np[i, 16] - data_np[i - 1, 17]
@@ -92,7 +92,7 @@ def simulation_input(run_number, takeover_time):
     act_dist = [list(chain(*x)) for x in temp2.values]
 
     for v in range(len(vid)):
-        act_seq[v] = ['Idle', 'TO Queue', 'Takeover', 'Teleoperated'] * tour_len[v]
+        act_seq[v] = ['Buffer', 'TO Queue', 'Takeover', 'Teleoperated'] * tour_len[v]
         act_seq[v].append('Signed off')
         act_dist[v].append(0)
 
