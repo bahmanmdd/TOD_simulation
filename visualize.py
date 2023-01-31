@@ -40,13 +40,13 @@ def plot_results(states_vh_df, states_to_df, queues_df, output_dir, replication_
 
     lines1 = ax1.plot(states_vh_df['Teleoperated'], 'royalblue')
     lines2 = ax2.plot(queues_df.iloc[:, 0], 'm')
-    lines3 = ax3.plot(states_vh_df.iloc[:, 1:-1][::-1])
+    lines3 = ax3.plot(states_vh_df)
     lines4 = ax4.plot(states_to_df, alpha=0.7)
 
     lines1[0].set_label('Teleoperated')
     lines2[0].set_label('TO Queue')
     for i in range(len(lines3)):
-        lines3[i].set_label(states_vh_df.columns[i + 1])
+        lines3[i].set_label(states_vh_df.columns[i])
     for i in range(len(lines4)):
         lines4[i].set_label(states_to_df.columns[i])
 
@@ -137,13 +137,13 @@ def plot_summary(states_vh_df, states_to_df, queues_df, output_dir, replication_
 
     lines1 = ax1.plot(states_vh_df['Teleoperated'], 'royalblue')
     lines2 = ax2.plot(queues_df.iloc[:, 0], 'm')
-    lines3 = ax3.plot(states_vh_df.iloc[:, 1:-1])
+    lines3 = ax3.plot(states_vh_df)
     lines4 = ax4.plot(states_to_df)
 
     lines1[0].set_label('Teleoperated')
     lines2[0].set_label('TO Queue')
     for i in range(len(lines3)):
-        lines3[i].set_label(states_vh_df.columns[i + 1])
+        lines3[i].set_label(states_vh_df.columns[i])
     for i in range(len(lines4)):
         lines4[i].set_label(states_to_df.columns[i])
 
