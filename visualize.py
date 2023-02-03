@@ -5,7 +5,7 @@ created by: Bahman Madadi
 
 import numpy as np
 import matplotlib.pyplot as plt
-plt.style.use('seaborn')
+plt.style.use('default')
 
 
 def plot_results(states_vh_df, states_to_df, queues_df, output_dir, replication_no, n_vh, n_to, time_up):
