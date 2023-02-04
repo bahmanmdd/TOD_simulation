@@ -1,6 +1,6 @@
 """
-main package for simulation of teleoperated driving in shipping processes
-created by: Bahman Madadi
+    main package for simulation of teleoperated driving in shipping processes
+    created by: Bahman Madadi
 """
 
 import math
@@ -23,8 +23,8 @@ def parameters():
     simulation_duration = [9, 24]
 
     ## model variation parameters
-    to2v_ratios = np.array(list(range(20, 105, 5))) / 100
-    takeover_times = [0, 2, 5]
+    to2v_ratios = np.array(list(range(30, 105, 5))) / 100
+    takeover_times = [0, 1, 2, 3]
 
     ## operation parameters
     max_to_duration = 4.5 * 60
@@ -92,7 +92,6 @@ def run_simulation(replication_no, output_dir, runs, n_vh, n_to, setup_to, act_s
     tour_completion = 1
     distance_completion = 1
 
-
     next_event = None
     next_event_to = None
 
@@ -129,7 +128,7 @@ def run_simulation(replication_no, output_dir, runs, n_vh, n_to, setup_to, act_s
     ##############
 
     # event execution loop
-    while True:
+    while event_list.any():
 
         # find next event in event list
         current_event = event_list[0]
@@ -153,7 +152,7 @@ def run_simulation(replication_no, output_dir, runs, n_vh, n_to, setup_to, act_s
         # process event #
         #################
 
-        if current_event[names['Event']] == 'Idle':
+        if current_event[names['Event']] == 'Buffer':
             next_event, vehicle = event.process_idle(simulation_time, vehicle, current_event, names)
 
         elif current_event[names['Event']] == 'TO Queue':
@@ -193,8 +192,9 @@ def run_simulation(replication_no, output_dir, runs, n_vh, n_to, setup_to, act_s
 
         # check for termination conditions
         if all(v.status == 'Signed off' for v in vh_dict.values()):
-            n_mins = simulation_time
             break
+
+    duration = simulation_time
 
     ###########
     # wrap up #
@@ -223,8 +223,8 @@ def run_simulation(replication_no, output_dir, runs, n_vh, n_to, setup_to, act_s
 
     # utilization rates
     event_log['Duration'] = pd.to_numeric(event_log['Duration'])
-    utilization_vh_avg = np.sum(event_log[(event_log['Event']=='Teleoperated') | (event_log['Event']=='Takeover')]['Duration']) / (n_mins * n_vh)
-    utilization_to_avg = np.sum(event_log.query('Event!="Idle"')['Duration']) / (n_mins * n_to)
+    utilization_vh_avg = np.sum(event_log[(event_log['Event']=='Teleoperated') | (event_log['Event']=='Takeover')]['Duration']) / (duration * n_vh)
+    utilization_to_avg = np.sum(event_log.query('Event!="Idle"')['Duration']) / (duration * n_to)
 
     # queues
     indices = states_vh_df.index.values
@@ -232,7 +232,7 @@ def run_simulation(replication_no, output_dir, runs, n_vh, n_to, setup_to, act_s
     q_sizes = states_vh_df['TO Queue'].values
     queues_total_time = np.dot(q_sizes[:-1], intervs)
     queues_vh_time_avg = queues_total_time / n_vh
-    queues_to_leng_avg = queues_total_time / n_mins
+    queues_to_leng_avg = queues_total_time / duration
     queues_to_leng_max = np.max(q_sizes)
     move_times_avg = np.sum([v.distribution[i] for v in vh_dict.values() for i in range(v.stage+1) if v.pattern[i] == 'Teleoperated'])/n_vh
     delay_ratio_avg = ((move_times_avg + queues_vh_time_avg + takeover_time)/move_times_avg) - 1

@@ -1,3 +1,8 @@
+"""
+    process events
+    created by: Bahman Madadi
+"""
+
 import numpy as np
 import pandas as pd
 

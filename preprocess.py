@@ -1,6 +1,6 @@
 """
-preprocessing MassGT data for simulation of teleoperated driving in shipping processes
-created by: Bahman Madadi
+    preprocessing MassGT data for simulation of teleoperated driving in shipping processes
+    created by: Bahman Madadi
 """
 
 from itertools import chain
@@ -13,6 +13,9 @@ def select_tours(tour_len, tour_begin, runs, proportion):
 
     # read data
     data_full = pd.read_csv('Input/Tours_REF.csv')
+
+    # rng seed
+    np.random.seed(seed=7)
 
     # shift all trips by a uniform random number between 0-1 hour (to avoid same start times)
     tour_sizes = data_full.groupby('TOUR_ID', sort=False).size()
@@ -54,7 +57,7 @@ def select_tours(tour_len, tour_begin, runs, proportion):
         data_np = data_sample.values
         buffer = np.zeros(len(data_np))
         for i in range(len(data_np)):
-            if np.mod(data_np[i, 2], 10) == 0:
+            if data_np[i, 2]/data_np[i, 1][1] == 10:
                 buffer[i] = data_np[i, 16] - data_np[i, 15]
             else:
                 buffer[i] = data_np[i, 16] - data_np[i - 1, 17]
