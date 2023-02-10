@@ -194,7 +194,7 @@ def run_simulation(replication_no, output_dir, runs, n_vh, n_to, setup_to, act_s
         if all(v.status == 'Signed off' for v in vh_dict.values()):
             break
 
-    duration = simulation_time - tour_begin * 60
+    duration = simulation_time
 
     ###########
     # wrap up #
@@ -223,11 +223,8 @@ def run_simulation(replication_no, output_dir, runs, n_vh, n_to, setup_to, act_s
 
     # utilization rates
     event_log['Duration'] = pd.to_numeric(event_log['Duration'])
-    utilization_vh_avg = np.sum(event_log[(event_log['Event'] =='Teleoperated') |
-                                          (event_log['Event'] =='Takeover')]['Duration']) / (duration * n_vh)
-    utilization_to_avg = np.sum(event_log[(event_log['Event'] =='Teleoperated') |
-                                          (event_log['Event'] =='Takeover') |
-                                          (event_log['Event'] =='Resting')]['Duration']) / (duration * n_to)
+    utilization_vh_avg = np.sum(event_log[(event_log['Event']=='Teleoperated') | (event_log['Event']=='Takeover')]['Duration']) / (duration * n_vh)
+    utilization_to_avg = np.sum(event_log.query('Event!="Idle"')['Duration']) / (duration * n_to)
 
     # queues
     indices = states_vh_df.index.values
