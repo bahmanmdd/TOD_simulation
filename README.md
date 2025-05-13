@@ -110,6 +110,9 @@ Overall Trade-off Plots:
 * An Excel file Full_ratios.xlsx containing the aggregated data used for these plots.
 
 
+![image](https://github.com/user-attachments/assets/35624b1a-ab16-4735-8c74-9e0127e4d0a3)
+
+
 
 
 ## Citation
