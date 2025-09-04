@@ -33,16 +33,14 @@ The Python code is organized into the following modules:
 
 ## Setup and Installation
 
-1.  **Prerequisites:**
-    * Python 3.x
-    * The following Python libraries (install via pip):
-        * `numpy`
-        * `pandas`
-        * `matplotlib`
-        * `seaborn`
+1.  **Prerequisites & environment:**
+
+Create a conda environment with 2022-compatible packages:
+
 
     ```bash
-    pip install numpy pandas matplotlib seaborn
+    conda create -n tod python=3.9 numpy=1.23.5 pandas=1.5.3 matplotlib=3.6.3 scipy=1.9.3 seaborn=0.12.2 -c conda-forge -y
+    conda activate tod
     ```
 
 2.  **Input Data:**
